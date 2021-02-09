@@ -5,6 +5,19 @@ set -Eeo pipefail
 DEFAULT_DOWNLOAD_URL="https://download.docker.com"
 DEFAULT_PREFIX=/usr/local/bin
 DEFAULT_VERSION="20.10.2"
+DEFAULT_COMPOSE_VERSION="1.28.2"
+DEFAULT_COMPOSE_DOWNLOAD_URL="https://github.com/docker/compose"
+DEFAULT_COMPOSE_PREFIX=${DEFAULT_PREFIX}
+
+# The channel to install from:
+#   * nightly
+#   * test
+#   * stable
+#   * edge (deprecated)
+DEFAULT_CHANNEL_VALUE="stable"
+if [ -z "$CHANNEL" ]; then
+	CHANNEL=$DEFAULT_CHANNEL_VALUE
+fi
 
 if [ -z "$DOWNLOAD_URL" ]; then
 	DOWNLOAD_URL=$DEFAULT_DOWNLOAD_URL
@@ -18,11 +31,27 @@ if [ -z "$VERSION" ]; then
 	VERSION=$DEFAULT_VERSION
 fi
 
+if [ -z "$COMPOSE_VERSION" ]; then
+	COMPOSE_VERSION=$DEFAULT_COMPOSE_VERSION
+fi
+
+if [ -z "$COMPOSE_PREFIX" ]; then
+	COMPOSE_PREFIX=$DEFAULT_COMPOSE_PREFIX
+fi
+
+if [ -z "$COMPOSE_DOWNLOAD_URL" ]; then
+	COMPOSE_DOWNLOAD_URL=$DEFAULT_COMPOSE_DOWNLOAD_URL
+fi
+
 mirror=''
+compose_mirror=''
+DRY_RUN=${DRY_RUN:-}
+WITH_COMPOSE=${WITH_COMPOSE:-}
 while [ $# -gt 0 ]; do
 	case "$1" in
 		--mirror)
-			mirror="$2"
+			mirror_opt="$2"
+			mirror="$(echo $mirror_opt | tr '[:upper:]' '[:lower:]')"
 			shift
 			;;
 		--prefix)
@@ -32,10 +61,26 @@ while [ $# -gt 0 ]; do
 		--version)
 			VERSION="$2"
 			shift
+			;;
+		--compose-prefix)
+			COMPOSE_PREFIX="$2"
+			shift
+			;;
+		--compose-version)
+			COMPOSE_VERSION="$2"
+			shift
+			;;
+		--compose-mirror)
+			compose_mirror_opt="$2"
+			compose_mirror="$(echo $compose_mirror_opt | tr '[:upper:]' '[:lower:]')"
+			shift
+			;;
+		--dry-run)
+			DRY_RUN=1
+			;;
+		--with-compose)
+			WITH_COMPOSE=1
 			;;			
-		# --dry-run)
-		# 	DRY_RUN=1
-		# 	;;
 		--*)
 			echo "Illegal option $1"
 			;;
@@ -44,44 +89,81 @@ while [ $# -gt 0 ]; do
 done
 
 case "$mirror" in
-	Aliyun)
+	aliyun)
 		DOWNLOAD_URL="https://mirrors.aliyun.com/docker-ce"
 		;;
-	Huaweicloud)
+	huaweicloud)
 		DOWNLOAD_URL="https://repo.huaweicloud.com/docker-ce"
 		;;
 	163)
 		DOWNLOAD_URL="https://mirrors.163.com/docker-ce"
 		;;
-	Tencent)
+	tencent)
 		DOWNLOAD_URL="https://mirrors.cloud.tencent.com/docker-ce"
 		;;
-	Tsinghua)
+	tsinghua)
 		DOWNLOAD_URL="https://mirrors.tuna.tsinghua.edu.cn/docker-ce"
 		;;
-	Tuna)
+	tuna)
 		DOWNLOAD_URL="https://mirrors.tuna.tsinghua.edu.cn/docker-ce"
-		;;		
-	Ustc)
+		;;
+	ustc)
 		DOWNLOAD_URL="https://mirrors.ustc.edu.cn/docker-ce"
 		;;
-	Sjtu)
+	sjtu)
 		DOWNLOAD_URL="https://mirror.sjtu.edu.cn/docker-ce"
 		;;
-	Zju)
+	zju)
 		DOWNLOAD_URL="https://mirrors.zju.edu.cn/docker-ce"
 		;;
-	Nju)
+	nju)
 		DOWNLOAD_URL="https://mirrors.nju.edu.cn/docker-ce"
+		;;
+	njupt)
+		DOWNLOAD_URL="https://mirrors.njupt.edu.cn/docker-ce"
+		;;
+	bfsu)
+		DOWNLOAD_URL="https://mirrors.bfsu.edu.cn/docker-ce"
+		;;
+	nwafu)
+		DOWNLOAD_URL="https://mirrors.nwafu.edu.cn/docker-ce"
+		;;
+	sustech)
+		DOWNLOAD_URL="https://mirrors.sustech.edu.cn/docker-ce"
+		;;
+	hit)
+		DOWNLOAD_URL="https://mirrors.hit.edu.cn/docker-ce"
+		;;
+	xtom)
+		DOWNLOAD_URL="https://mirrors.xtom.com.hk/docker-ce"
+		;;
+esac
+
+case "$compose_mirror" in
+	daocloud)
+		COMPOSE_DOWNLOAD_URL="https://get.daocloud.io/docker/compose"
 		;;
 esac
 
 
-
-
-
 command_exists() {
 	command -v "$@" > /dev/null 2>&1
+}
+
+is_dry_run() {
+	if [ -z "$DRY_RUN" ]; then
+		return 1
+	else
+		return 0
+	fi
+}
+
+is_with_compose() {
+	if [ -z "$WITH_COMPOSE" ]; then
+		return 1
+	else
+		return 0
+	fi
 }
 
 is_wsl() {
@@ -182,12 +264,10 @@ semverParse() {
 	patch="${patch%%[-.]*}"
 }
 
-
-
 echo_docker_as_nonroot() {
-	# if is_dry_run; then
-	# 	return
-	# fi
+	if is_dry_run; then
+		return
+	fi
 	if command_exists docker && [ -e /var/run/docker.sock ]; then
 		(
 			set -x
@@ -212,31 +292,33 @@ echo_docker_as_nonroot() {
 
 }
 
-do_goupadd_docker() {
+
+
+do_install_static() {
 	set +e
 	grep -e "^docker" /etc/group >& /dev/null
 	if [ $? -ne 0 ]; then
-		groupadd docker
-	#else
-	#	echo "docker group installed"	
+		$sh_c "groupadd docker"
 	fi
 	set -e
-}
 
-do_install_static() {
-	mkdir -p /etc/systemd/system/docker.service.d
-	mkdir -p /etc/docker/
-	mkdir -p /var/lib/docker/
-	mkdir -p /var/lib/containerd/
-	mkdir -p /etc/containerd/
+	$sh_c "mkdir -p /etc/systemd/system/docker.service.d"
+	$sh_c "mkdir -p /etc/docker/"
+	$sh_c "mkdir -p /var/lib/docker/"
+	$sh_c "mkdir -p /var/lib/containerd/"
+	$sh_c "mkdir -p /etc/containerd/"
 
-	platform=`uname -s | awk '{print tolower($0)}'`
+	platform=$(uname -s | awk '{print tolower($0)}')
 	url=${DOWNLOAD_URL}/${platform}/static/stable/$(uname -m)/docker-${VERSION}.tgz
-	echo $url;
-	curl -fksSL $url | tar --extract --gunzip --verbose --strip-components 1 --directory=$PREFIX
+	
+	$sh_c "curl -fksSL ${url} | tar --extract --gunzip --verbose --strip-components 1 --directory=${PREFIX}"
+	$sh_c "curl -fksSL -o /usr/lib/systemd/system/docker.service https://ghproxy.com/https://raw.githubusercontent.com/docker/docker-ce/master/components/packaging/systemd/docker.service"
+	$sh_c "curl -fksSL -o /usr/lib/systemd/system/docker.socket https://ghproxy.com/https://raw.githubusercontent.com/docker/docker-ce/master/components/packaging/systemd/docker.socket"
+	$sh_c "curl -fksSL -o /usr/lib/systemd/system/containerd.service https://ghproxy.com/https://raw.githubusercontent.com/containerd/containerd/master/containerd.service"
 
-if [ ! -f /etc/docker/daemon.json ]; then
-cat > /etc/docker/daemon.json << EOF
+
+
+JSON_VAR=$(cat << EOF
 {
 	"dns": [
 		"223.5.5.5",
@@ -244,9 +326,7 @@ cat > /etc/docker/daemon.json << EOF
 		"8.8.8.8"
 	],
 	"log-level": "info",
-	"oom-score-adjust": -1000,
 	"debug": false,
-	"metrics-addr": "0.0.0.0:1337",
 	"experimental": true,
 	"insecure-registries": [],
 	"live-restore": true,
@@ -268,16 +348,34 @@ cat > /etc/docker/daemon.json << EOF
 	}
 }
 EOF
+)
+
+if is_dry_run; then
+echo "cat > /etc/docker/daemon.json << EOF"
+cat << EOF
+$JSON_VAR
+EOF
+echo "EOF"
+else
+if [ ! -f /etc/docker/daemon.json ]; then
+cat > /etc/docker/daemon.json << EOF
+$JSON_VAR
+EOF
+fi
 fi
 
-	curl -fksSL -o /usr/lib/systemd/system/docker.service https://ghproxy.com/https://raw.githubusercontent.com/docker/docker-ce/master/components/packaging/systemd/docker.service
-	curl -fksSL -o /usr/lib/systemd/system/docker.socket https://ghproxy.com/https://raw.githubusercontent.com/docker/docker-ce/master/components/packaging/systemd/docker.socket
-	curl -fksSL -o /usr/lib/systemd/system/containerd.service https://ghproxy.com/https://raw.githubusercontent.com/containerd/containerd/master/containerd.service
-	sed -i "s@/usr/bin/dockerd@$PREFIX/dockerd@g" /usr/lib/systemd/system/docker.service
+
+	if is_with_compose; then
+		compose_url="${COMPOSE_DOWNLOAD_URL}/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)"
+		$sh_c "curl -L $compose_url -o $COMPOSE_PREFIX/docker-compose"
+		$sh_c "chmod +x $COMPOSE_PREFIX/docker-compose"
+	fi
+
+	$sh_c "sed -i "s@/usr/bin/dockerd@$PREFIX/dockerd@g" /usr/lib/systemd/system/docker.service"
 	
-	systemctl enable docker && systemctl daemon-reload && systemctl start docker;
-	systemctl --full --no-pager status docker
-	journalctl -xe --no-pager -u docker
+	$sh_c "systemctl enable docker && systemctl daemon-reload && systemctl start docker"
+	$sh_c "systemctl --full --no-pager status docker"
+	$sh_c "journalctl -xe --no-pager -u docker"
 }
 
 
@@ -346,9 +444,9 @@ do_install() {
 		fi
 	fi
 
-	# if is_dry_run; then
-	# 	sh_c="echo"
-	# fi
+	if is_dry_run; then
+		sh_c="echo"
+	fi
 
 	# perform some very rudimentary platform detection
 	lsb_dist=$( get_distribution )
@@ -446,11 +544,11 @@ do_install() {
 
 
 
-if [ `id -u ` -ne 0 ]
+if [ "$(id -u 2>/dev/null || true)" -ne 0 ]
   then echo "Please run as root"
   exit 1
 fi
 
 
-do_goupadd_docker
+
 do_install
