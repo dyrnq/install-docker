@@ -8,13 +8,16 @@ DEFAULT_VERSION="20.10.2"
 DEFAULT_COMPOSE_VERSION="1.28.2"
 DEFAULT_COMPOSE_DOWNLOAD_URL="https://github.com/docker/compose"
 DEFAULT_COMPOSE_PREFIX=${DEFAULT_PREFIX}
-
 # The channel to install from:
 #   * nightly
 #   * test
 #   * stable
 #   * edge (deprecated)
 DEFAULT_CHANNEL_VALUE="stable"
+DEFAULT_SYSTEMD_DOCKER_SERVICE="https://cdn.jsdelivr.net/gh/docker/docker-ce@master/components/packaging/systemd/docker.service"
+DEFAULT_SYSTEMD_DOCKER_SOCKET="https://cdn.jsdelivr.net/gh/docker/docker-ce@master/components/packaging/systemd/docker.socket"
+DEFAULT_SYSTEMD_CONTAINERD_SERVICE="https://cdn.jsdelivr.net/gh/containerd/containerd@master/containerd.service"
+
 if [ -z "$CHANNEL" ]; then
 	CHANNEL=$DEFAULT_CHANNEL_VALUE
 fi
@@ -43,6 +46,19 @@ if [ -z "$COMPOSE_DOWNLOAD_URL" ]; then
 	COMPOSE_DOWNLOAD_URL=$DEFAULT_COMPOSE_DOWNLOAD_URL
 fi
 
+if [ -z "$SYSTEMD_DOCKER_SERVICE" ]; then
+	SYSTEMD_DOCKER_SERVICE=$DEFAULT_SYSTEMD_DOCKER_SERVICE
+fi
+
+if [ -z "$SYSTEMD_DOCKER_SOCKET" ]; then
+	SYSTEMD_DOCKER_SOCKET=$DEFAULT_SYSTEMD_DOCKER_SOCKET
+fi
+
+if [ -z "$SYSTEMD_CONTAINERD_SERVICE" ]; then
+	SYSTEMD_CONTAINERD_SERVICE=$DEFAULT_SYSTEMD_CONTAINERD_SERVICE
+fi
+
+systemd=''
 mirror=''
 compose_mirror=''
 DRY_RUN=${DRY_RUN:-}
@@ -62,6 +78,10 @@ while [ $# -gt 0 ]; do
 			VERSION="$2"
 			shift
 			;;
+		--systemd)
+			systemd="$2"
+			shift
+			;;			
 		--compose-prefix)
 			COMPOSE_PREFIX="$2"
 			shift
@@ -142,6 +162,24 @@ esac
 case "$compose_mirror" in
 	daocloud)
 		COMPOSE_DOWNLOAD_URL="https://get.daocloud.io/docker/compose"
+		;;
+esac
+
+case "$systemd" in
+	github)
+		SYSTEMD_DOCKER_SERVICE="https://raw.githubusercontent.com/docker/docker-ce/master/components/packaging/systemd/docker.service"
+		SYSTEMD_DOCKER_SOCKET="https://raw.githubusercontent.com/docker/docker-ce/master/components/packaging/systemd/docker.socket"
+		SYSTEMD_CONTAINERD_SERVICE="https://raw.githubusercontent.com/containerd/containerd/master/containerd.service"
+		;;
+	jsdelivr)
+		SYSTEMD_DOCKER_SERVICE="https://cdn.jsdelivr.net/gh/docker/docker-ce@master/components/packaging/systemd/docker.service"
+		SYSTEMD_DOCKER_SOCKET="https://cdn.jsdelivr.net/gh/docker/docker-ce@master/components/packaging/systemd/docker.socket"
+		SYSTEMD_CONTAINERD_SERVICE="https://cdn.jsdelivr.net/gh/containerd/containerd@master/containerd.service"
+		;;
+	ghproxy)
+		SYSTEMD_DOCKER_SERVICE="https://ghproxy.com/https://raw.githubusercontent.com/docker/docker-ce/master/components/packaging/systemd/docker.service"
+		SYSTEMD_DOCKER_SOCKET="https://ghproxy.com/https://raw.githubusercontent.com/docker/docker-ce/master/components/packaging/systemd/docker.socket"
+		SYSTEMD_CONTAINERD_SERVICE="https://ghproxy.com/https://raw.githubusercontent.com/containerd/containerd/master/containerd.service"
 		;;
 esac
 
@@ -309,12 +347,12 @@ do_install_static() {
 	$sh_c "mkdir -p /etc/containerd/"
 
 	platform=$(uname -s | awk '{print tolower($0)}')
-	url=${DOWNLOAD_URL}/${platform}/static/stable/$(uname -m)/docker-${VERSION}.tgz
+	url=${DOWNLOAD_URL}/${platform}/static/${CHANNEL}/$(uname -m)/docker-${VERSION}.tgz
 	
 	$sh_c "curl -fksSL ${url} | tar --extract --gunzip --verbose --strip-components 1 --directory=${PREFIX}"
-	$sh_c "curl -fksSL -o /usr/lib/systemd/system/docker.service https://ghproxy.com/https://raw.githubusercontent.com/docker/docker-ce/master/components/packaging/systemd/docker.service"
-	$sh_c "curl -fksSL -o /usr/lib/systemd/system/docker.socket https://ghproxy.com/https://raw.githubusercontent.com/docker/docker-ce/master/components/packaging/systemd/docker.socket"
-	$sh_c "curl -fksSL -o /usr/lib/systemd/system/containerd.service https://ghproxy.com/https://raw.githubusercontent.com/containerd/containerd/master/containerd.service"
+	$sh_c "curl -fksSL -o /usr/lib/systemd/system/docker.service ${SYSTEMD_DOCKER_SERVICE}"
+	$sh_c "curl -fksSL -o /usr/lib/systemd/system/docker.socket ${SYSTEMD_DOCKER_SOCKET}"
+	$sh_c "curl -fksSL -o /usr/lib/systemd/system/containerd.service ${SYSTEMD_CONTAINERD_SERVICE}"
 
 
 

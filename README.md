@@ -5,7 +5,13 @@
 git clone --depth 1 https://github.com/dyrnq/install-docker.git
 ```
 ```bash
+curl -fksSL -O https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh
+
+curl -fksSL -O https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh
+
 curl -fksSL -O https://ghproxy.com/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh
+
+chmod +x ./install-docker.sh
 ```
 
 ## Usage
