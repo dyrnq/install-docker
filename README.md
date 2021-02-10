@@ -1,24 +1,27 @@
 # install-docker.sh
 
+
+## Quickstart
+```bash
+curl -fsSL https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh | bash -s docker --mirror Tuna --version 20.10.3 --with-compose --compose-version 1.28.2 --compose-mirror daocloud
+```
+
 ## Get
 ```bash
 git clone --depth 1 https://github.com/dyrnq/install-docker.git
 ```
 ```bash
-curl -fksSL -O https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh
+curl -fsSL -O https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh
 
-curl -fksSL -O https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh
+curl -fsSL -O https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh
 
-curl -fksSL -O https://ghproxy.com/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh
+curl -fsSL -O https://ghproxy.com/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh
 
 chmod +x ./install-docker.sh
 ```
 
 ## Usage
-* basic
-```bash
-./install-docker.sh --mirror Tuna
-```
+
 * --version
 ```bash
 ./install-docker.sh --mirror Tuna --version 20.10.3 --prefix /usr/local/bin

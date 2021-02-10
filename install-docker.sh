@@ -17,6 +17,8 @@ DEFAULT_CHANNEL_VALUE="stable"
 DEFAULT_SYSTEMD_DOCKER_SERVICE="https://cdn.jsdelivr.net/gh/docker/docker-ce@master/components/packaging/systemd/docker.service"
 DEFAULT_SYSTEMD_DOCKER_SOCKET="https://cdn.jsdelivr.net/gh/docker/docker-ce@master/components/packaging/systemd/docker.socket"
 DEFAULT_SYSTEMD_CONTAINERD_SERVICE="https://cdn.jsdelivr.net/gh/containerd/containerd@master/containerd.service"
+DEFAULT_SYSTEMD_PREFIX=/usr/lib/systemd/system
+DEFAULT_SYSTEMD=1
 
 if [ -z "$CHANNEL" ]; then
 	CHANNEL=$DEFAULT_CHANNEL_VALUE
@@ -58,9 +60,19 @@ if [ -z "$SYSTEMD_CONTAINERD_SERVICE" ]; then
 	SYSTEMD_CONTAINERD_SERVICE=$DEFAULT_SYSTEMD_CONTAINERD_SERVICE
 fi
 
-systemd=''
+if [ -z "$SYSTEMD_PREFIX" ]; then
+	if [ -d "$DEFAULT_SYSTEMD_PREFIX" ]; then
+		SYSTEMD_PREFIX=$DEFAULT_SYSTEMD_PREFIX
+	elif [ -d "/etc/systemd/system" ]; then
+		SYSTEMD_PREFIX="/etc/systemd/system"
+	fi
+fi
+
+
 mirror=''
 compose_mirror=''
+systemd_mirror=''
+SYSTEMD=${DEFAULT_SYSTEMD:-}
 DRY_RUN=${DRY_RUN:-}
 WITH_COMPOSE=${WITH_COMPOSE:-}
 while [ $# -gt 0 ]; do
@@ -78,10 +90,6 @@ while [ $# -gt 0 ]; do
 			VERSION="$2"
 			shift
 			;;
-		--systemd)
-			systemd="$2"
-			shift
-			;;			
 		--compose-prefix)
 			COMPOSE_PREFIX="$2"
 			shift
@@ -98,9 +106,21 @@ while [ $# -gt 0 ]; do
 		--dry-run)
 			DRY_RUN=1
 			;;
+		--no-systemd)
+			SYSTEMD=''
+			;;
+		--systemd-mirror)
+			systemd_mirror_opt="$2"
+			systemd_mirror="$(echo $systemd_mirror_opt | tr '[:upper:]' '[:lower:]')"			
+			shift
+			;;
+		--systemd-prefix)
+			SYSTEMD_PREFIX="$2"
+			shift
+			;;			
 		--with-compose)
 			WITH_COMPOSE=1
-			;;			
+			;;
 		--*)
 			echo "Illegal option $1"
 			;;
@@ -165,7 +185,7 @@ case "$compose_mirror" in
 		;;
 esac
 
-case "$systemd" in
+case "$systemd_mirror" in
 	github)
 		SYSTEMD_DOCKER_SERVICE="https://raw.githubusercontent.com/docker/docker-ce/master/components/packaging/systemd/docker.service"
 		SYSTEMD_DOCKER_SOCKET="https://raw.githubusercontent.com/docker/docker-ce/master/components/packaging/systemd/docker.socket"
@@ -190,6 +210,14 @@ command_exists() {
 
 is_dry_run() {
 	if [ -z "$DRY_RUN" ]; then
+		return 1
+	else
+		return 0
+	fi
+}
+
+is_systemd() {
+	if [ -z "$SYSTEMD" ]; then
 		return 1
 	else
 		return 0
@@ -349,10 +377,13 @@ do_install_static() {
 	platform=$(uname -s | awk '{print tolower($0)}')
 	url=${DOWNLOAD_URL}/${platform}/static/${CHANNEL}/$(uname -m)/docker-${VERSION}.tgz
 	
-	$sh_c "curl -fksSL ${url} | tar --extract --gunzip --verbose --strip-components 1 --directory=${PREFIX}"
-	$sh_c "curl -fksSL -o /usr/lib/systemd/system/docker.service ${SYSTEMD_DOCKER_SERVICE}"
-	$sh_c "curl -fksSL -o /usr/lib/systemd/system/docker.socket ${SYSTEMD_DOCKER_SOCKET}"
-	$sh_c "curl -fksSL -o /usr/lib/systemd/system/containerd.service ${SYSTEMD_CONTAINERD_SERVICE}"
+	$sh_c "curl -fsSL ${url} | tar --extract --gunzip --verbose --strip-components 1 --directory=${PREFIX}"
+	if is_with_compose; then
+		compose_url="${COMPOSE_DOWNLOAD_URL}/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)"
+		$sh_c "curl -L $compose_url -o $COMPOSE_PREFIX/docker-compose"
+		$sh_c "chmod +x $COMPOSE_PREFIX/docker-compose"
+	fi	
+
 
 
 
@@ -403,17 +434,15 @@ fi
 fi
 
 
-	if is_with_compose; then
-		compose_url="${COMPOSE_DOWNLOAD_URL}/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)"
-		$sh_c "curl -L $compose_url -o $COMPOSE_PREFIX/docker-compose"
-		$sh_c "chmod +x $COMPOSE_PREFIX/docker-compose"
+	if is_systemd; then
+		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/docker.service ${SYSTEMD_DOCKER_SERVICE}"
+		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/docker.socket ${SYSTEMD_DOCKER_SOCKET}"
+		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/containerd.service ${SYSTEMD_CONTAINERD_SERVICE}"
+		$sh_c "sed -i "s@/usr/bin/dockerd@$PREFIX/dockerd@g" ${SYSTEMD_PREFIX}/docker.service"		
+		$sh_c "systemctl enable docker && systemctl daemon-reload && systemctl start docker"
+		$sh_c "systemctl --full --no-pager status docker"
+		$sh_c "journalctl -xe --no-pager -u docker"
 	fi
-
-	$sh_c "sed -i "s@/usr/bin/dockerd@$PREFIX/dockerd@g" /usr/lib/systemd/system/docker.service"
-	
-	$sh_c "systemctl enable docker && systemctl daemon-reload && systemctl start docker"
-	$sh_c "systemctl --full --no-pager status docker"
-	$sh_c "journalctl -xe --no-pager -u docker"
 }
 
 
