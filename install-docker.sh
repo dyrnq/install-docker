@@ -389,8 +389,7 @@ echo_docker_as_nonroot() {
 
 do_install_static() {
 	set +e
-	grep -e "^docker" /etc/group >& /dev/null
-	if [ $? -ne 0 ]; then
+	if ! grep -e "^docker" /etc/group >& /dev/null; then
 		$sh_c "groupadd docker"
 	fi
 	set -e
@@ -477,7 +476,7 @@ fi
 		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/docker.service ${SYSTEMD_DOCKER_SERVICE}"
 		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/docker.socket ${SYSTEMD_DOCKER_SOCKET}"
 		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/containerd.service ${SYSTEMD_CONTAINERD_SERVICE}"
-		$sh_c "sed -i \"s@/usr/bin/dockerd@"$PREFIX"/dockerd@g\" ${SYSTEMD_PREFIX}/docker.service"
+		$sh_c "sed -i \"s@/usr/bin/dockerd@""$PREFIX""/dockerd@g\" ${SYSTEMD_PREFIX}/docker.service"
 		$sh_c "systemctl enable docker && systemctl daemon-reload && systemctl start docker"
 		$sh_c "systemctl --full --no-pager status docker"
 		$sh_c "journalctl -xe --no-pager -u docker"
