@@ -19,6 +19,8 @@ DEFAULT_SYSTEMD_DOCKER_SOCKET="https://cdn.jsdelivr.net/gh/docker/docker-ce@mast
 DEFAULT_SYSTEMD_CONTAINERD_SERVICE="https://cdn.jsdelivr.net/gh/containerd/containerd@master/containerd.service"
 DEFAULT_SYSTEMD_PREFIX=/usr/lib/systemd/system
 DEFAULT_SYSTEMD=1
+DEFAULT_WRITE_DAEMON_JSON_FILE=1
+DEFAULT_DAEMON_JSON_FILE_PREFIX="/etc/docker"
 
 if [ -z "$CHANNEL" ]; then
 	CHANNEL=$DEFAULT_CHANNEL_VALUE
@@ -67,6 +69,10 @@ if [ -z "$SYSTEMD_PREFIX" ]; then
 		SYSTEMD_PREFIX="/etc/systemd/system"
 	fi
 fi
+if [ -z "$DAEMON_JSON_FILE_PREFIX" ]; then
+	DAEMON_JSON_FILE_PREFIX=$DEFAULT_DAEMON_JSON_FILE_PREFIX
+fi
+
 
 
 mirror=''
@@ -75,6 +81,8 @@ systemd_mirror=''
 SYSTEMD=${DEFAULT_SYSTEMD:-}
 DRY_RUN=${DRY_RUN:-}
 WITH_COMPOSE=${WITH_COMPOSE:-}
+WRITE_DAEMON_JSON_FILE=${DEFAULT_WRITE_DAEMON_JSON_FILE:-}
+DAEMON_JSON_FILE=${DAEMON_JSON_FILE:-}
 while [ $# -gt 0 ]; do
 	case "$1" in
 		--mirror)
@@ -109,6 +117,17 @@ while [ $# -gt 0 ]; do
 		--no-systemd)
 			SYSTEMD=''
 			;;
+		--daemon-json)
+			WRITE_DAEMON_JSON_FILE=1
+			DAEMON_JSON_FILE="$2"
+			;;
+		--daemon-json-prefix)
+			DAEMON_JSON_FILE_PREFIX="$2"
+			shift
+			;;
+		--no-daemon-json)
+			WRITE_DAEMON_JSON_FILE=''
+			;;
 		--systemd-mirror)
 			systemd_mirror_opt="$2"
 			systemd_mirror="$(echo $systemd_mirror_opt | tr '[:upper:]' '[:lower:]')"			
@@ -117,7 +136,7 @@ while [ $# -gt 0 ]; do
 		--systemd-prefix)
 			SYSTEMD_PREFIX="$2"
 			shift
-			;;			
+			;;
 		--with-compose)
 			WITH_COMPOSE=1
 			;;
@@ -210,6 +229,14 @@ command_exists() {
 
 is_dry_run() {
 	if [ -z "$DRY_RUN" ]; then
+		return 1
+	else
+		return 0
+	fi
+}
+
+is_write_daemon_json() {
+	if [ -z "$WRITE_DAEMON_JSON_FILE" ]; then
 		return 1
 	else
 		return 0
@@ -387,7 +414,7 @@ do_install_static() {
 
 
 
-JSON_VAR=$(cat << EOF
+DAEMON_JSON_VAR=$(cat << EOF
 {
 	"dns": [
 		"223.5.5.5",
@@ -419,18 +446,30 @@ JSON_VAR=$(cat << EOF
 EOF
 )
 
-if is_dry_run; then
-echo "cat > /etc/docker/daemon.json << EOF"
+daemonJsonPath="${DAEMON_JSON_FILE_PREFIX}/daemon.json"
+
+if is_write_daemon_json; then
+
+	if [ ! -z "$DAEMON_JSON_FILE" ]; then
+		if [[ "$DAEMON_JSON_FILE" =~ ^http.* ]]; then
+			$sh_c "curl -fsSL ${DAEMON_JSON_FILE} --output ${daemonJsonPath}";
+		else
+			$sh_c "cat ${DAEMON_JSON_FILE} > ${daemonJsonPath}";
+		fi
+	else
+
+		if is_dry_run; then
+		echo "cat > ${daemonJsonPath} << EOF"
 cat << EOF
-$JSON_VAR
+$DAEMON_JSON_VAR
 EOF
-echo "EOF"
-else
-if [ ! -f /etc/docker/daemon.json ]; then
-cat > /etc/docker/daemon.json << EOF
-$JSON_VAR
+		echo "EOF"
+		else
+cat > ${daemonJsonPath} << EOF
+$DAEMON_JSON_VAR
 EOF
-fi
+		fi
+	fi
 fi
 
 
