@@ -48,6 +48,7 @@ jobs:
       - name: Lint Code Base
         uses: github/super-linter@v3
         env:
+          SHELLCHECK_OPTS: "-e SC1091"
           VALIDATE_ALL_CODEBASE: false
           ERROR_ON_MISSING_EXEC_BIT: true
           DEFAULT_BRANCH: main

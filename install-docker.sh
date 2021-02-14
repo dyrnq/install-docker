@@ -87,7 +87,7 @@ while [ $# -gt 0 ]; do
 	case "$1" in
 		--mirror)
 			mirror_opt="$2"
-			mirror="$(echo $mirror_opt | tr '[:upper:]' '[:lower:]')"
+			mirror="$(echo "$mirror_opt" | tr '[:upper:]' '[:lower:]')"
 			shift
 			;;
 		--prefix)
@@ -108,7 +108,7 @@ while [ $# -gt 0 ]; do
 			;;
 		--compose-mirror)
 			compose_mirror_opt="$2"
-			compose_mirror="$(echo $compose_mirror_opt | tr '[:upper:]' '[:lower:]')"
+			compose_mirror="$(echo "$compose_mirror_opt" | tr '[:upper:]' '[:lower:]')"
 			shift
 			;;
 		--dry-run)
@@ -130,7 +130,7 @@ while [ $# -gt 0 ]; do
 			;;
 		--systemd-mirror)
 			systemd_mirror_opt="$2"
-			systemd_mirror="$(echo $systemd_mirror_opt | tr '[:upper:]' '[:lower:]')"			
+			systemd_mirror="$(echo "$systemd_mirror_opt" | tr '[:upper:]' '[:lower:]')"			
 			shift
 			;;
 		--systemd-prefix)
@@ -409,7 +409,7 @@ do_install_static() {
 		compose_url="${COMPOSE_DOWNLOAD_URL}/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)"
 		$sh_c "curl -L $compose_url -o $COMPOSE_PREFIX/docker-compose"
 		$sh_c "chmod +x $COMPOSE_PREFIX/docker-compose"
-	fi	
+	fi
 
 
 
@@ -450,7 +450,7 @@ daemonJsonPath="${DAEMON_JSON_FILE_PREFIX}/daemon.json"
 
 if is_write_daemon_json; then
 
-	if [ ! -z "$DAEMON_JSON_FILE" ]; then
+	if [ -n "$DAEMON_JSON_FILE" ]; then
 		if [[ "$DAEMON_JSON_FILE" =~ ^http.* ]]; then
 			$sh_c "curl -fsSL ${DAEMON_JSON_FILE} --output ${daemonJsonPath}";
 		else
@@ -465,7 +465,7 @@ $DAEMON_JSON_VAR
 EOF
 		echo "EOF"
 		else
-cat > ${daemonJsonPath} << EOF
+cat > "${daemonJsonPath}" << EOF
 $DAEMON_JSON_VAR
 EOF
 		fi
@@ -477,7 +477,7 @@ fi
 		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/docker.service ${SYSTEMD_DOCKER_SERVICE}"
 		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/docker.socket ${SYSTEMD_DOCKER_SOCKET}"
 		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/containerd.service ${SYSTEMD_CONTAINERD_SERVICE}"
-		$sh_c "sed -i "s@/usr/bin/dockerd@$PREFIX/dockerd@g" ${SYSTEMD_PREFIX}/docker.service"		
+		$sh_c "sed -i \"s@/usr/bin/dockerd@"$PREFIX"/dockerd@g\" ${SYSTEMD_PREFIX}/docker.service"
 		$sh_c "systemctl enable docker && systemctl daemon-reload && systemctl start docker"
 		$sh_c "systemctl --full --no-pager status docker"
 		$sh_c "journalctl -xe --no-pager -u docker"
