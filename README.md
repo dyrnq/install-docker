@@ -58,21 +58,21 @@ chmod +x ./install-docker.sh
 
 ## Command-Line Options
 
-| Name                  | Description                               | Default                                   |
-| ----------            | ----------------                          | ----------------------                    |
-| --mirror              | docker binary download url                | https://download.docker.com               |
-| --prefix              | docker binary install dir                 | /usr/local/bin                            |
-| --version             | docker binary version                     | 20.10.2                                   |
-| --with-compose        | install docker-compose                    |                                           |
-| --compose-prefix      | docker-compose install dir                | /usr/local/bin                            |
-| --compose-version     | docker-compose version                    | 1.28.2                                    |
-| --compose-mirror      | docker-compose download url               | https://github.com/docker/compose         |
-| --systemd-mirror      | mirror link of docker systemd unit files  | jsdelivr                                  |
-| --no-systemd          | do not install docker systemd unit files  |                                           |
-| --daemon-json         | daemon.json file                          |                                           |
-| --no-daemon-json      | do not install daemon.json                |                                           |
-| --daemon-json-prefix  | daemon.json path                          | /etc/docker                               |
-| --dry-run             | dry run                                   |                                           |
+| Name                  | Description                                   | Default                                   |
+| ----------            | ----------------                              | ----------------------                    |
+| --mirror              | mirror of docker binary download url          |                                           |
+| --prefix              | docker binary installation directory          | /usr/local/bin                            |
+| --version             | docker binary version                         | 20.10.2                                   |
+| --with-compose        | install docker-compose                        |                                           |
+| --compose-prefix      | docker-compose installation directory         | /usr/local/bin                            |
+| --compose-version     | docker-compose version                        | 1.28.2                                    |
+| --compose-mirror      | mirror of docker-compose download url         |                                           |
+| --systemd-mirror      | mirror of dockerd`s systemd unit files        | jsdelivr                                  |
+| --no-systemd          | do not install dockerd`s systemd unit files   |                                           |
+| --daemon-json         | daemon.json path or url                       |                                           |
+| --no-daemon-json      | do not install daemon.json                    |                                           |
+| --daemon-json-prefix  | daemon.json path                              | /etc/docker                               |
+| --dry-run             | dry run                                       |                                           |
 
 ## Tks
 * https://get.docker.com/
