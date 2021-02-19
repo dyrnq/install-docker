@@ -160,11 +160,11 @@ case "$mirror" in
 	tencent)
 		DOWNLOAD_URL="https://mirrors.cloud.tencent.com/docker-ce"
 		;;
-	tsinghua)
+	tsinghua|tuna)
 		DOWNLOAD_URL="https://mirrors.tuna.tsinghua.edu.cn/docker-ce"
 		;;
-	tuna)
-		DOWNLOAD_URL="https://mirrors.tuna.tsinghua.edu.cn/docker-ce"
+	opentuna)
+		DOWNLOAD_URL="https://opentuna.cn/docker-ce"
 		;;
 	ustc)
 		DOWNLOAD_URL="https://mirrors.ustc.edu.cn/docker-ce"
@@ -297,58 +297,6 @@ get_distribution() {
 	echo "$lsb_dist"
 }
 
-# Check if this is a forked Linux distro
-check_forked() {
-
-	# Check for lsb_release command existence, it usually exists in forked distros
-	if command_exists lsb_release; then
-		# Check if the `-u` option is supported
-		set +e
-		lsb_release -a -u > /dev/null 2>&1
-		lsb_release_exit_code=$?
-		set -e
-
-		# Check if the command has exited successfully, it means we're in a forked distro
-		if [ "$lsb_release_exit_code" = "0" ]; then
-			# Print info about current distro
-			cat <<-EOF
-			You're using '$lsb_dist' version '$dist_version'.
-			EOF
-
-			# Get the upstream release info
-			lsb_dist=$(lsb_release -a -u 2>&1 | tr '[:upper:]' '[:lower:]' | grep -E 'id' | cut -d ':' -f 2 | tr -d '[:space:]')
-			dist_version=$(lsb_release -a -u 2>&1 | tr '[:upper:]' '[:lower:]' | grep -E 'codename' | cut -d ':' -f 2 | tr -d '[:space:]')
-
-			# Print info about upstream distro
-			cat <<-EOF
-			Upstream release is '$lsb_dist' version '$dist_version'.
-			EOF
-		else
-			if [ -r /etc/debian_version ] && [ "$lsb_dist" != "ubuntu" ] && [ "$lsb_dist" != "raspbian" ]; then
-				if [ "$lsb_dist" = "osmc" ]; then
-					# OSMC runs Raspbian
-					lsb_dist=raspbian
-				else
-					# We're Debian and don't even know it!
-					lsb_dist=debian
-				fi
-				dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
-				case "$dist_version" in
-					10)
-						dist_version="buster"
-					;;
-					9)
-						dist_version="stretch"
-					;;
-					8|'Kali Linux 2')
-						dist_version="jessie"
-					;;
-				esac
-			fi
-		fi
-	fi
-}
-
 semverParse() {
 	major="${1%%.*}"
 	minor="${1#$major.}"
@@ -406,7 +354,7 @@ do_install_static() {
 	$sh_c "curl -fsSL ${url} | tar --extract --gunzip --verbose --strip-components 1 --directory=${PREFIX}"
 	if is_with_compose; then
 		compose_url="${COMPOSE_DOWNLOAD_URL}/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)"
-		$sh_c "curl -L $compose_url -o $COMPOSE_PREFIX/docker-compose"
+		$sh_c "curl -fsSL $compose_url -o $COMPOSE_PREFIX/docker-compose"
 		$sh_c "chmod +x $COMPOSE_PREFIX/docker-compose"
 	fi
 
@@ -569,64 +517,16 @@ do_install() {
 		( set -x; sleep 20 )
 	fi
 
-	case "$lsb_dist" in
-
-		ubuntu)
-			if command_exists lsb_release; then
-				dist_version="$(lsb_release --codename | cut -f2)"
-			fi
-			if [ -z "$dist_version" ] && [ -r /etc/lsb-release ]; then
-				dist_version="$(. /etc/lsb-release && echo "$DISTRIB_CODENAME")"
-			fi
-		;;
-
-		debian|raspbian)
-			dist_version="$(sed 's/\/.*//' /etc/debian_version | sed 's/\..*//')"
-			case "$dist_version" in
-				10)
-					dist_version="buster"
-				;;
-				9)
-					dist_version="stretch"
-				;;
-				8)
-					dist_version="jessie"
-				;;
-			esac
-		;;
-
-		centos|rhel)
-			if [ -z "$dist_version" ] && [ -r /etc/os-release ]; then
-				dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
-			fi
-		;;
-
-		*)
-			if command_exists lsb_release; then
-				dist_version="$(lsb_release --release | cut -f2)"
-			fi
-			if [ -z "$dist_version" ] && [ -r /etc/os-release ]; then
-				dist_version="$(. /etc/os-release && echo "$VERSION_ID")"
-			fi
-		;;
-
-	esac
-
-	# Check if this is a forked Linux distro
-	check_forked
-
-
 	# Run setup for each distro accordingly
 	case "$lsb_dist" in
-		ubuntu|debian|raspbian)
-			do_install_static
-			echo_docker_as_nonroot
-			exit 0
-			;;
-		centos|fedora|rhel)
-			do_install_static
-			echo_docker_as_nonroot
-			exit 0
+		opensuse-tumbleweed|opensuse-leap)
+			if ! command_exists iptables; then
+				echo
+				echo "ERROR: iptables not found"
+				echo "Please install iptables from https://software.opensuse.org/download.html?project=security%3Anetfilter&package=iptables"
+				echo
+				exit 1
+			fi
 			;;
 		*)
 			if [ -z "$lsb_dist" ]; then
@@ -638,13 +538,11 @@ do_install() {
 					exit 1
 				fi
 			fi
-			echo
-			echo "ERROR: Unsupported distribution '$lsb_dist'"
-			echo
-			exit 1
 			;;
 	esac
-	exit 1
+	do_install_static
+	echo_docker_as_nonroot
+	exit 0
 }
 
 
