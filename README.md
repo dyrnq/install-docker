@@ -1,5 +1,10 @@
 # install-docker.sh
 
+This is a script to install docker binaries. It can help you quickly extract the docker binaries from various mirrors without the steps of setting up the repository.
+
+Supports installation on more operating systems, centos, debian, ubuntu, openSUSE, Kali, archlinux, manjaro.
+
+Support docker-compose binary installation.
 
 ## Quickstart
 ```bash
@@ -26,10 +31,7 @@ chmod +x ./install-docker.sh
 ```bash
 ./install-docker.sh --mirror Tuna --version 20.10.3 --prefix /usr/local/bin
 ```
-* --dry-run
-```bash
-./install-docker.sh --mirror Tuna --dry-run
-```
+
 * --mirror
 
 | mirror             |linux(x86_64)                                                                   |
@@ -40,6 +42,7 @@ chmod +x ./install-docker.sh
 | huaweicloud        |<https://mirrors.huaweicloud.com/docker-ce/linux/static/stable/x86_64/>         |
 | tuna               |<https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/static/stable/x86_64/>    |
 | tsinghua           |<https://mirrors.tuna.tsinghua.edu.cn/docker-ce/linux/static/stable/x86_64/>    |
+| opentuna           |<https://opentuna.cn/docker-ce/linux/static/stable/x86_64/>                     |
 | ustc               |<https://mirrors.ustc.edu.cn/docker-ce/linux/static/stable/x86_64/>             |
 | sjtu               |<https://mirror.sjtu.edu.cn/docker-ce/linux/static/stable/x86_64/>              |
 | zju                |<https://mirrors.zju.edu.cn/docker-ce/linux/static/stable/x86_64/>              |
@@ -54,6 +57,11 @@ chmod +x ./install-docker.sh
 * --with-compose
 ```bash
 ./install-docker.sh --mirror Tuna --version 20.10.3 --prefix /usr/local/bin --with-compose --compose-version 1.28.2 --compose-mirror daocloud --compose-prefix /usr/local/bin
+```
+
+* --dry-run
+```bash
+./install-docker.sh --mirror Tuna --dry-run
 ```
 
 ## Command-Line Options
