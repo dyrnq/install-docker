@@ -21,6 +21,7 @@ DEFAULT_SYSTEMD_PREFIX=/usr/lib/systemd/system
 DEFAULT_SYSTEMD=1
 DEFAULT_WRITE_DAEMON_JSON_FILE=1
 DEFAULT_DAEMON_JSON_FILE_PREFIX="/etc/docker"
+DEFAULT_DAEMON_JSON_VAR="{\"live-restore\":true,\"registry-mirrors\":[\"https://docker.mirrors.ustc.edu.cn\"],\"storage-driver\":\"overlay2\",\"storage-opts\":[\"overlay2.override_kernel_check=true\"],\"log-level\":\"info\",\"log-driver\":\"json-file\",\"log-opts\":{\"max-size\":\"100m\"}}"
 
 if [ -z "$CHANNEL" ]; then
 	CHANNEL=$DEFAULT_CHANNEL_VALUE
@@ -83,6 +84,9 @@ DRY_RUN=${DRY_RUN:-}
 WITH_COMPOSE=${WITH_COMPOSE:-}
 WRITE_DAEMON_JSON_FILE=${DEFAULT_WRITE_DAEMON_JSON_FILE:-}
 DAEMON_JSON_FILE=${DAEMON_JSON_FILE:-}
+FLAG_PREFIX=${FLAG_PREFIX:-}
+FLAG_COMPOSE_PREFIX=${FLAG_COMPOSE_PREFIX:-}
+NO_MKDIR=${NO_MKDIR:-}
 while [ $# -gt 0 ]; do
 	case "$1" in
 		--mirror)
@@ -92,6 +96,7 @@ while [ $# -gt 0 ]; do
 			;;
 		--prefix)
 			PREFIX="$2"
+			FLAG_PREFIX=1
 			shift
 			;;
 		--version)
@@ -100,6 +105,7 @@ while [ $# -gt 0 ]; do
 			;;
 		--compose-prefix)
 			COMPOSE_PREFIX="$2"
+			FLAG_COMPOSE_PREFIX=1
 			shift
 			;;
 		--compose-version)
@@ -139,6 +145,9 @@ while [ $# -gt 0 ]; do
 			;;
 		--with-compose)
 			WITH_COMPOSE=1
+			;;
+		--no-mkdir)
+			NO_MKDIR=1
 			;;
 		--*)
 			echo "Illegal option $1"
@@ -227,6 +236,24 @@ command_exists() {
 	command -v "$@" > /dev/null 2>&1
 }
 
+is_flag_prefix() {
+	if [ -z "$FLAG_PREFIX" ]; then
+		return 1
+	else
+		return 0
+	fi
+}
+
+is_flag_compose_prefix() {
+	if [ -z "$FLAG_COMPOSE_PREFIX" ]; then
+		return 1
+	else
+		return 0
+	fi
+}
+if is_flag_prefix && ! is_flag_compose_prefix; then
+	COMPOSE_PREFIX="$PREFIX"
+fi
 is_dry_run() {
 	if [ -z "$DRY_RUN" ]; then
 		return 1
@@ -235,6 +262,13 @@ is_dry_run() {
 	fi
 }
 
+is_no_mkdir() {
+	if [ -z "$NO_MKDIR" ]; then
+		return 1
+	else
+		return 0
+	fi
+}
 is_write_daemon_json() {
 	if [ -z "$WRITE_DAEMON_JSON_FILE" ]; then
 		return 1
@@ -341,12 +375,14 @@ do_install_static() {
 		$sh_c "groupadd docker"
 	fi
 	set -e
-
-	$sh_c "mkdir -p /etc/systemd/system/docker.service.d"
-	$sh_c "mkdir -p /etc/docker/"
-	$sh_c "mkdir -p /var/lib/docker/"
-	$sh_c "mkdir -p /var/lib/containerd/"
-	$sh_c "mkdir -p /etc/containerd/"
+	
+	if ! is_no_mkdir; then
+		$sh_c "mkdir -p /etc/systemd/system/docker.service.d"
+		$sh_c "mkdir -p /etc/docker/"
+		$sh_c "mkdir -p /var/lib/docker/"
+		$sh_c "mkdir -p /var/lib/containerd/"
+		$sh_c "mkdir -p /etc/containerd/"
+	fi
 
 	platform=$(uname -s | awk '{print tolower($0)}')
 	url=${DOWNLOAD_URL}/${platform}/static/${CHANNEL}/$(uname -m)/docker-${VERSION}.tgz
@@ -357,41 +393,6 @@ do_install_static() {
 		$sh_c "curl -fsSL $compose_url -o $COMPOSE_PREFIX/docker-compose"
 		$sh_c "chmod +x $COMPOSE_PREFIX/docker-compose"
 	fi
-
-
-
-
-DAEMON_JSON_VAR=$(cat << EOF
-{
-	"dns": [
-		"223.5.5.5",
-		"223.6.6.6",
-		"8.8.8.8"
-	],
-	"log-level": "info",
-	"debug": false,
-	"experimental": true,
-	"insecure-registries": [],
-	"live-restore": true,
-	"registry-mirrors": [
-		"https://docker.mirrors.ustc.edu.cn"
-	],
-	"max-concurrent-downloads": 20,
-	"exec-opts": [
-		""
-	],
-	"storage-driver": "overlay2",
-	"storage-opts": [
-		"overlay2.override_kernel_check=true"
-	],
-	"log-driver": "json-file",
-	"log-opts": {
-		"max-size": "100m",
-		"max-file": "10"
-	}
-}
-EOF
-)
 
 daemonJsonPath="${DAEMON_JSON_FILE_PREFIX}/daemon.json"
 
@@ -408,13 +409,15 @@ if is_write_daemon_json; then
 		if is_dry_run; then
 		echo "cat > ${daemonJsonPath} << EOF"
 cat << EOF
-$DAEMON_JSON_VAR
+$DEFAULT_DAEMON_JSON_VAR
 EOF
 		echo "EOF"
-		else
-cat > "${daemonJsonPath}" << EOF
-$DAEMON_JSON_VAR
-EOF
+ 		else
+		 		if command_exists python3; then
+					$sh_c "echo '$DEFAULT_DAEMON_JSON_VAR' | python3 -m json.tool > ${daemonJsonPath}"
+				else
+					$sh_c "echo '$DEFAULT_DAEMON_JSON_VAR' > ${daemonJsonPath}"
+				fi				
 		fi
 	fi
 fi
@@ -424,8 +427,13 @@ fi
 		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/docker.service ${SYSTEMD_DOCKER_SERVICE}"
 		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/docker.socket ${SYSTEMD_DOCKER_SOCKET}"
 		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/containerd.service ${SYSTEMD_CONTAINERD_SERVICE}"
-		$sh_c "sed -i \"s@/usr/bin/dockerd@""$PREFIX""/dockerd@g\" ${SYSTEMD_PREFIX}/docker.service"
-		$sh_c "systemctl enable docker && systemctl daemon-reload && systemctl start docker"
+		if [ "$PREFIX" != "/usr/bin" ]; then
+			$sh_c "sed -i \"s@/usr/bin/dockerd@""$PREFIX""/dockerd@g\" ${SYSTEMD_PREFIX}/docker.service"
+		fi
+		if [ "$PREFIX" != "/usr/local/bin" ]; then
+			$sh_c "sed -i \"s@/usr/local/bin/containerd@""$PREFIX""/containerd@g\" ${SYSTEMD_PREFIX}/containerd.service"
+		fi
+		$sh_c "systemctl daemon-reload && systemctl enable docker && systemctl start docker"
 		$sh_c "systemctl --full --no-pager status docker"
 		$sh_c "journalctl -xe --no-pager -u docker"
 	fi
@@ -433,7 +441,7 @@ fi
 
 
 do_install() {
-	if command_exists docker; then
+	if command_exists docker && ! is_dry_run; then
 		docker_version="$(docker -v | cut -d ' ' -f3 | cut -d ',' -f1)"
 		MAJOR_W=1
 		MINOR_W=10
@@ -540,6 +548,20 @@ do_install() {
 			fi
 			;;
 	esac
+
+	local prefix_check=''
+	if [ ! -d "$PREFIX" ]; then
+		echo "ERROR: ${PREFIX} directory does not exist"
+		prefix_check=1
+	fi
+	if [ ! "$PREFIX" = "$COMPOSE_PREFIX" ] && [ ! -d "$COMPOSE_PREFIX" ]; then
+		echo "ERROR: ${COMPOSE_PREFIX} directory does not exist"
+		prefix_check=1
+	fi
+	if [ -n "$prefix_check" ]; then
+		exit 1
+	fi
+
 	do_install_static
 	echo_docker_as_nonroot
 	exit 0
@@ -547,10 +569,10 @@ do_install() {
 
 
 
-if [ "$(id -u 2>/dev/null || true)" -ne 0 ]
-  then echo "Please run as root"
-  exit 1
-fi
+# if [ "$(id -u 2>/dev/null || true)" -ne 0 ]
+#   then echo "Please run as root"
+#   exit 1
+# fi
 
 
 
