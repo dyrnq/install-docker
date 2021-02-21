@@ -78,8 +78,8 @@ chmod +x ./install-docker.sh
 | --systemd-mirror      | mirror of dockerd`s systemd unit files        | jsdelivr                                  |
 | --no-systemd          | do not install dockerd`s systemd unit files   |                                           |
 | --daemon-json         | daemon.json path or url                       |                                           |
-| --no-daemon-json      | do not install daemon.json                    |                                           |
 | --daemon-json-prefix  | daemon.json path                              | /etc/docker                               |
+| --no-daemon-json      | do not install daemon.json                    |                                           |
 | --dry-run             | dry run                                       |                                           |
 
 ## Tks
