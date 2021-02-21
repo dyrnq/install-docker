@@ -372,12 +372,11 @@ echo_docker_as_nonroot() {
 do_install_static() {
 	set +e
 	if ! grep -e "^docker" /etc/group >& /dev/null; then
-		$sh_c "groupadd docker"
+		$sh_c "groupadd docker 2>/dev/null || addgroup docker"
 	fi
 	set -e
 	
 	if ! is_no_mkdir; then
-		$sh_c "mkdir -p /etc/systemd/system/docker.service.d"
 		$sh_c "mkdir -p /etc/docker/"
 		$sh_c "mkdir -p /var/lib/docker/"
 		$sh_c "mkdir -p /var/lib/containerd/"
@@ -387,7 +386,7 @@ do_install_static() {
 	platform=$(uname -s | awk '{print tolower($0)}')
 	url=${DOWNLOAD_URL}/${platform}/static/${CHANNEL}/$(uname -m)/docker-${VERSION}.tgz
 	
-	$sh_c "curl -fsSL ${url} | tar --extract --gunzip --verbose --strip-components 1 --directory=${PREFIX}"
+	$sh_c "curl -fsSL ${url} | tar -xvz --strip-components 1 --directory=${PREFIX}"
 	if is_with_compose; then
 		compose_url="${COMPOSE_DOWNLOAD_URL}/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)"
 		$sh_c "curl -fsSL $compose_url -o $COMPOSE_PREFIX/docker-compose"
@@ -417,25 +416,31 @@ EOF
 					$sh_c "echo '$DEFAULT_DAEMON_JSON_VAR' | python3 -m json.tool > ${daemonJsonPath}"
 				else
 					$sh_c "echo '$DEFAULT_DAEMON_JSON_VAR' > ${daemonJsonPath}"
-				fi				
+				fi
 		fi
 	fi
 fi
 
-
-	if is_systemd; then
-		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/docker.service ${SYSTEMD_DOCKER_SERVICE}"
-		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/docker.socket ${SYSTEMD_DOCKER_SOCKET}"
-		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/containerd.service ${SYSTEMD_CONTAINERD_SERVICE}"
-		if [ "$PREFIX" != "/usr/bin" ]; then
-			$sh_c "sed -i \"s@/usr/bin/dockerd@""$PREFIX""/dockerd@g\" ${SYSTEMD_PREFIX}/docker.service"
+	if command_exists systemd; then
+		if is_systemd; then
+			$sh_c "mkdir -p /etc/systemd/system/docker.service.d"
+			$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/docker.service ${SYSTEMD_DOCKER_SERVICE}"
+			$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/docker.socket ${SYSTEMD_DOCKER_SOCKET}"
+			$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/containerd.service ${SYSTEMD_CONTAINERD_SERVICE}"
+			if [ "$PREFIX" != "/usr/bin" ]; then
+				$sh_c "sed -i \"s@/usr/bin/dockerd@""$PREFIX""/dockerd@g\" ${SYSTEMD_PREFIX}/docker.service"
+			fi
+			if [ "$PREFIX" != "/usr/local/bin" ]; then
+				$sh_c "sed -i \"s@/usr/local/bin/containerd@""$PREFIX""/containerd@g\" ${SYSTEMD_PREFIX}/containerd.service"
+			fi
+			$sh_c "systemctl daemon-reload && systemctl enable docker"
+			docker_state=$(systemctl show --property SubState docker | cut -d '=' -f 2)
+			if [ "$docker_state" = "running" ]; then
+				echo "docker is running"
+			else
+				$sh_c "systemctl start docker || journalctl -xe --no-pager -u docker"
+			fi
 		fi
-		if [ "$PREFIX" != "/usr/local/bin" ]; then
-			$sh_c "sed -i \"s@/usr/local/bin/containerd@""$PREFIX""/containerd@g\" ${SYSTEMD_PREFIX}/containerd.service"
-		fi
-		$sh_c "systemctl daemon-reload && systemctl enable docker && systemctl start docker"
-		$sh_c "systemctl --full --no-pager status docker"
-		$sh_c "journalctl -xe --no-pager -u docker"
 	fi
 }
 
