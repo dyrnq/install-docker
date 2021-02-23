@@ -23,6 +23,9 @@ DEFAULT_WRITE_DAEMON_JSON_FILE=1
 DEFAULT_DAEMON_JSON_FILE_PREFIX="/etc/docker"
 DEFAULT_DAEMON_JSON_VAR="{\"live-restore\":true,\"registry-mirrors\":[\"https://docker.mirrors.ustc.edu.cn\"],\"storage-driver\":\"overlay2\",\"storage-opts\":[\"overlay2.override_kernel_check=true\"],\"log-level\":\"info\",\"log-driver\":\"json-file\",\"log-opts\":{\"max-size\":\"100m\"}}"
 
+OPENRC_DOCKER_CONFD="https://cdn.jsdelivr.net/gh/alpinelinux/aports@master/community/docker/docker.confd"
+OPENRC_DOCKER_INITD="https://cdn.jsdelivr.net/gh/alpinelinux/aports@master/community/docker/docker.initd"
+
 if [ -z "$CHANNEL" ]; then
 	CHANNEL=$DEFAULT_CHANNEL_VALUE
 fi
@@ -79,9 +82,11 @@ fi
 mirror=''
 compose_mirror=''
 systemd_mirror=''
+openrc_mirror=''
 SYSTEMD=${DEFAULT_SYSTEMD:-}
 DRY_RUN=${DRY_RUN:-}
 WITH_COMPOSE=${WITH_COMPOSE:-}
+WITH_OPENRC=${WITH_OPENRC:-}
 WRITE_DAEMON_JSON_FILE=${DEFAULT_WRITE_DAEMON_JSON_FILE:-}
 DAEMON_JSON_FILE=${DAEMON_JSON_FILE:-}
 FLAG_PREFIX=${FLAG_PREFIX:-}
@@ -139,6 +144,11 @@ while [ $# -gt 0 ]; do
 			systemd_mirror="$(echo "$systemd_mirror_opt" | tr '[:upper:]' '[:lower:]')"			
 			shift
 			;;
+		--openrc-mirror)
+			openrc_mirror_opt="$2"
+			openrc_mirror="$(echo "$openrc_mirror_opt" | tr '[:upper:]' '[:lower:]')"			
+			shift
+			;;
 		--systemd-prefix)
 			SYSTEMD_PREFIX="$2"
 			shift
@@ -146,6 +156,9 @@ while [ $# -gt 0 ]; do
 		--with-compose)
 			WITH_COMPOSE=1
 			;;
+		--with-openrc)
+			WITH_OPENRC=1
+			;;	
 		--no-mkdir)
 			NO_MKDIR=1
 			;;
@@ -231,6 +244,20 @@ case "$systemd_mirror" in
 		;;
 esac
 
+case "$openrc_mirror" in
+	github)
+		OPENRC_DOCKER_CONFD="https://raw.githubusercontent.com/alpinelinux/aports/master/community/docker/docker.confd"
+		OPENRC_DOCKER_INITD="https://raw.githubusercontent.com/alpinelinux/aports/master/community/docker/docker.initd"
+		;;
+	jsdelivr)
+		OPENRC_DOCKER_CONFD="https://cdn.jsdelivr.net/gh/alpinelinux/aports@master/community/docker/docker.confd"
+		OPENRC_DOCKER_INITD="https://cdn.jsdelivr.net/gh/alpinelinux/aports@master/community/docker/docker.initd"
+		;;
+	ghproxy)
+		OPENRC_DOCKER_CONFD="https://ghproxy.com/https://raw.githubusercontent.com/alpinelinux/aports/master/community/docker/docker.confd"
+		OPENRC_DOCKER_INITD="https://ghproxy.com/https://raw.githubusercontent.com/alpinelinux/aports/master/community/docker/docker.initd"
+		;;
+esac
 
 command_exists() {
 	command -v "$@" > /dev/null 2>&1
@@ -279,6 +306,14 @@ is_write_daemon_json() {
 
 is_systemd() {
 	if [ -z "$SYSTEMD" ]; then
+		return 1
+	else
+		return 0
+	fi
+}
+
+is_with_openrc() {
+	if [ -z "$WITH_OPENRC" ]; then
 		return 1
 	else
 		return 0
@@ -372,7 +407,7 @@ echo_docker_as_nonroot() {
 do_install_static() {
 	set +e
 	if ! grep -e "^docker" /etc/group >& /dev/null; then
-		$sh_c "groupadd docker 2>/dev/null || addgroup docker"
+		$sh_c "groupadd docker 2>/dev/null || addgroup -S docker"
 	fi
 	set -e
 	
@@ -441,6 +476,17 @@ fi
 				$sh_c "systemctl start docker || journalctl -xe --no-pager -u docker"
 			fi
 		fi
+	fi
+	# openrc compatible
+	if rc-service --help > /dev/null 2>&1 && is_with_openrc; then
+		$sh_c "curl -fsSL -o /etc/conf.d/docker ${OPENRC_DOCKER_CONFD}"
+		$sh_c "curl -fsSL -o /etc/init.d/docker ${OPENRC_DOCKER_INITD}"
+		$sh_c "chmod +x /etc/init.d/docker"
+		if [ "$PREFIX" != "/usr/bin" ]; then
+			$sh_c "sed -i \"s@^#DOCKERD_BINARY.*@DOCKERD_BINARY=""$PREFIX""/dockerd@g\" /etc/conf.d/docker"
+		fi
+		$sh_c "rc-update add docker > /dev/null 2>&1"
+		$sh_c "rc-service docker start > /dev/null 2>&1"
 	fi
 }
 
