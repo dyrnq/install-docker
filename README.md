@@ -2,9 +2,11 @@
 
 This is a script to install docker binaries. It can help you quickly extract the docker binaries from various mirrors without the steps of setting up the repository.
 
-Supports installation on more operating systems, centos, debian, ubuntu, openSUSE, Kali, archlinux, manjaro.
+Supports installation on more operating systems, centos, debian, ubuntu, openSUSE, Kali, archlinux, manjaro, gentoo, Alpine.
 
 Support docker-compose binary installation.
+
+Support systemd、openrc.
 
 ## Quickstart
 ```bash
@@ -15,10 +17,17 @@ curl -fsSL https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.
 ```bash
 git clone --depth 1 https://github.com/dyrnq/install-docker.git
 ```
+
+or
+
 ```bash
 curl -fsSL -O https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh
 
+or
+
 curl -fsSL -O https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh
+
+or
 
 curl -fsSL -O https://ghproxy.com/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh
 
@@ -80,6 +89,8 @@ chmod +x ./install-docker.sh
 | --daemon-json         | daemon.json path or url                       |                                           |
 | --daemon-json-prefix  | daemon.json path                              | /etc/docker                               |
 | --no-daemon-json      | do not install daemon.json                    |                                           |
+| --with-openrc         | will install dockerd`s init.d files           |                                           |
+| --openrc-mirror       | mirror of dockerd`s init.d files              | jsdelivr                                  |
 | --dry-run             | dry run                                       |                                           |
 
 ## Tks
