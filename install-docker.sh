@@ -85,6 +85,7 @@ systemd_mirror=''
 openrc_mirror=''
 SYSTEMD=${DEFAULT_SYSTEMD:-}
 DRY_RUN=${DRY_RUN:-}
+OVERRIDE_EXISTING=${OVERRIDE_EXISTING:-}
 WITH_COMPOSE=${WITH_COMPOSE:-}
 WITH_OPENRC=${WITH_OPENRC:-}
 WRITE_DAEMON_JSON_FILE=${DEFAULT_WRITE_DAEMON_JSON_FILE:-}
@@ -124,6 +125,9 @@ while [ $# -gt 0 ]; do
 			;;
 		--dry-run)
 			DRY_RUN=1
+			;;
+		--override-existing)
+			OVERRIDE_EXISTING=1
 			;;
 		--no-systemd)
 			SYSTEMD=''
@@ -288,7 +292,13 @@ is_dry_run() {
 		return 0
 	fi
 }
-
+is_override_existing() {
+	if [ -z "$OVERRIDE_EXISTING" ]; then
+		return 1
+	else
+		return 0
+	fi
+}
 is_no_mkdir() {
 	if [ -z "$NO_MKDIR" ]; then
 		return 1
@@ -455,30 +465,28 @@ EOF
 		fi
 	fi
 fi
-
-	if command_exists systemd; then
-		if is_systemd; then
-			$sh_c "mkdir -p /etc/systemd/system/docker.service.d"
-			$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/docker.service ${SYSTEMD_DOCKER_SERVICE}"
-			$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/docker.socket ${SYSTEMD_DOCKER_SOCKET}"
-			$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/containerd.service ${SYSTEMD_CONTAINERD_SERVICE}"
-			if [ "$PREFIX" != "/usr/bin" ]; then
-				$sh_c "sed -i \"s@/usr/bin/dockerd@""$PREFIX""/dockerd@g\" ${SYSTEMD_PREFIX}/docker.service"
-			fi
-			if [ "$PREFIX" != "/usr/local/bin" ]; then
-				$sh_c "sed -i \"s@/usr/local/bin/containerd@""$PREFIX""/containerd@g\" ${SYSTEMD_PREFIX}/containerd.service"
-			fi
-			$sh_c "systemctl daemon-reload && systemctl enable docker"
-			docker_state=$(systemctl show --property SubState docker | cut -d '=' -f 2)
-			if [ "$docker_state" = "running" ]; then
-				echo "docker is running"
-			else
-				$sh_c "systemctl start docker || journalctl -xe --no-pager -u docker"
-			fi
+	if [[ "$(cat /proc/1/comm)" =~ systemd ]] && is_systemd; then
+		$sh_c "mkdir -p /etc/systemd/system/docker.service.d"
+		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/docker.service ${SYSTEMD_DOCKER_SERVICE}"
+		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/docker.socket ${SYSTEMD_DOCKER_SOCKET}"
+		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/containerd.service ${SYSTEMD_CONTAINERD_SERVICE}"
+		if [ "$PREFIX" != "/usr/bin" ]; then
+			$sh_c "sed -i \"s@/usr/bin/dockerd@""$PREFIX""/dockerd@g\" ${SYSTEMD_PREFIX}/docker.service"
+		fi
+		if [ "$PREFIX" != "/usr/local/bin" ]; then
+			$sh_c "sed -i \"s@/usr/local/bin/containerd@""$PREFIX""/containerd@g\" ${SYSTEMD_PREFIX}/containerd.service"
+		fi
+		$sh_c "systemctl daemon-reload && systemctl enable docker"
+		docker_state=$(systemctl show --property SubState docker | cut -d '=' -f 2)
+		if [ "$docker_state" = "running" ]; then
+			echo "docker is running"
+		else
+			$sh_c "systemctl start docker || journalctl -xe --no-pager -u docker"
 		fi
 	fi
+
 	# openrc compatible
-	if rc-service --help > /dev/null 2>&1 && is_with_openrc; then
+	if openrc --version > /dev/null 2>&1 && is_with_openrc; then
 		$sh_c "curl -fsSL -o /etc/conf.d/docker ${OPENRC_DOCKER_CONFD}"
 		$sh_c "curl -fsSL -o /etc/init.d/docker ${OPENRC_DOCKER_INITD}"
 		$sh_c "chmod +x /etc/init.d/docker"
@@ -492,7 +500,7 @@ fi
 
 
 do_install() {
-	if command_exists docker && ! is_dry_run; then
+	if command_exists docker && ! is_dry_run && ! is_override_existing; then
 		docker_version="$(docker -v | cut -d ' ' -f3 | cut -d ',' -f1)"
 		MAJOR_W=1
 		MINOR_W=10
