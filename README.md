@@ -92,6 +92,7 @@ chmod +x ./install-docker.sh
 | --with-openrc         | will install dockerd`s init.d files           |                                           |
 | --openrc-mirror       | mirror of dockerd`s init.d files              | jsdelivr                                  |
 | --dry-run             | dry run                                       |                                           |
+| --override-existing   | override existing                             |                                           |
 
 ## Tks
 * [https://get.docker.com/](https://get.docker.com/)
