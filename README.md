@@ -9,11 +9,13 @@ Support docker-compose binary installation.
 Support systemd、openrc.
 
 ## Quickstart
+
 ```bash
-curl -fsSL https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh | bash -s docker --mirror Tuna --version 20.10.3 --with-compose --compose-version 1.28.2 --compose-mirror daocloud
+curl -fsSL https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh | bash -s docker --mirror Tuna --version 20.10.4 --with-compose --compose-version 1.28.5 --compose-mirror daocloud
 ```
 
 ## Get
+
 ```bash
 git clone --depth 1 https://github.com/dyrnq/install-docker.git
 ```
@@ -37,6 +39,7 @@ chmod +x ./install-docker.sh
 ## Usage
 
 * --version
+
 ```bash
 ./install-docker.sh --mirror Tuna --version 20.10.3 --prefix /usr/local/bin
 ```
@@ -64,11 +67,13 @@ chmod +x ./install-docker.sh
 | xtom               |<https://mirrors.xtom.com.hk/docker-ce/linux/static/stable/x86_64/>             |
 
 * --with-compose
+
 ```bash
 ./install-docker.sh --mirror Tuna --version 20.10.3 --prefix /usr/local/bin --with-compose --compose-version 1.28.2 --compose-mirror daocloud --compose-prefix /usr/local/bin
 ```
 
 * --dry-run
+
 ```bash
 ./install-docker.sh --mirror Tuna --dry-run
 ```
@@ -95,5 +100,6 @@ chmod +x ./install-docker.sh
 | --override-existing   | override existing                             |                                           |
 
 ## Tks
+
 * [https://get.docker.com/](https://get.docker.com/)
 * [https://mirrorz.org/](https://mirrorz.org/)
