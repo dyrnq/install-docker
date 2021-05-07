@@ -222,6 +222,12 @@ case "$mirror" in
 	xtom)
 		DOWNLOAD_URL="https://mirrors.xtom.com.hk/docker-ce"
 		;;
+	pku)
+		DOWNLOAD_URL="https://mirrors.pku.edu.cn/docker-ce"
+		;;
+	ynu)
+		DOWNLOAD_URL="https://mirrors.ynu.edu.cn/docker-ce"
+		;;
 esac
 
 case "$compose_mirror" in
