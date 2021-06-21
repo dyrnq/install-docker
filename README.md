@@ -11,7 +11,13 @@ Support systemd、openrc.
 ## Quickstart
 
 ```bash
-curl -fsSL https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh | bash -s docker --mirror Tuna --version 20.10.4 --with-compose --compose-version 1.28.5 --compose-mirror daocloud
+curl -fsSL https://ghproxy.com/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh | bash -s docker --mirror Tuna --version 20.10.7 
+```
+
+or with docker-compose
+
+```bash
+curl -fsSL https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh | bash -s docker --mirror Tuna --version 20.10.7 --with-compose --compose-version 1.28.5 --compose-mirror daocloud
 ```
 
 ## Get
