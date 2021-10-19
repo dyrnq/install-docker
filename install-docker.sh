@@ -450,7 +450,7 @@ if is_write_daemon_json; then
 
 	if [ -n "$DAEMON_JSON_FILE" ]; then
 		if [[ "$DAEMON_JSON_FILE" =~ ^http.* ]]; then
-			$sh_c "curl -fsSL ${DAEMON_JSON_FILE} --output ${daemonJsonPath}";
+			$sh_c "curl --retry 3 -fsSL ${DAEMON_JSON_FILE} --output ${daemonJsonPath}";
 		else
 			$sh_c "cat ${DAEMON_JSON_FILE} > ${daemonJsonPath}";
 		fi
@@ -473,9 +473,9 @@ EOF
 fi
 	if [[ "$(cat /proc/1/comm)" =~ systemd ]] && is_systemd; then
 		$sh_c "mkdir -p /etc/systemd/system/docker.service.d"
-		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/docker.service ${SYSTEMD_DOCKER_SERVICE}"
-		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/docker.socket ${SYSTEMD_DOCKER_SOCKET}"
-		$sh_c "curl -fsSL -o ${SYSTEMD_PREFIX}/containerd.service ${SYSTEMD_CONTAINERD_SERVICE}"
+		$sh_c "curl --retry 3 -fsSL -o ${SYSTEMD_PREFIX}/docker.service ${SYSTEMD_DOCKER_SERVICE}"
+		$sh_c "curl --retry 3 -fsSL -o ${SYSTEMD_PREFIX}/docker.socket ${SYSTEMD_DOCKER_SOCKET}"
+		$sh_c "curl --retry 3 -fsSL -o ${SYSTEMD_PREFIX}/containerd.service ${SYSTEMD_CONTAINERD_SERVICE}"
 		if [ "$PREFIX" != "/usr/bin" ]; then
 			$sh_c "sed -i \"s@/usr/bin/dockerd@""$PREFIX""/dockerd@g\" ${SYSTEMD_PREFIX}/docker.service"
 		fi
@@ -493,8 +493,8 @@ fi
 
 	# openrc compatible
 	if openrc --version > /dev/null 2>&1 && is_with_openrc; then
-		$sh_c "curl -fsSL -o /etc/conf.d/docker ${OPENRC_DOCKER_CONFD}"
-		$sh_c "curl -fsSL -o /etc/init.d/docker ${OPENRC_DOCKER_INITD}"
+		$sh_c "curl --retry 3 -fsSL -o /etc/conf.d/docker ${OPENRC_DOCKER_CONFD}"
+		$sh_c "curl --retry 3 -fsSL -o /etc/init.d/docker ${OPENRC_DOCKER_INITD}"
 		$sh_c "chmod +x /etc/init.d/docker"
 		if [ "$PREFIX" != "/usr/bin" ]; then
 			$sh_c "sed -i \"s@^#DOCKERD_BINARY.*@DOCKERD_BINARY=""$PREFIX""/dockerd@g\" /etc/conf.d/docker"
