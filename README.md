@@ -11,13 +11,13 @@ Support systemd、openrc.
 ## Quickstart
 
 ```bash
-curl -fsSL https://ghproxy.com/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh | bash -s docker --mirror Tuna --version 20.10.7 
+curl -fsSL https://ghproxy.com/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh | bash -s docker --mirror Tuna --version 20.10.9
 ```
 
 or with docker-compose
 
 ```bash
-curl -fsSL https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh | bash -s docker --mirror Tuna --version 20.10.7 --with-compose --compose-version 1.28.5 --compose-mirror daocloud
+curl -fsSL https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh | bash -s docker --mirror Tuna --version 20.10.9 --with-compose --compose-version 1.29.2 --compose-mirror daocloud
 ```
 
 ## Get
@@ -47,7 +47,7 @@ chmod +x ./install-docker.sh
 * --version
 
 ```bash
-./install-docker.sh --mirror Tuna --version 20.10.3 --prefix /usr/local/bin
+./install-docker.sh --mirror Tuna --version 20.10.9 --prefix /usr/local/bin
 ```
 
 * --mirror
@@ -77,7 +77,7 @@ chmod +x ./install-docker.sh
 * --with-compose
 
 ```bash
-./install-docker.sh --mirror Tuna --version 20.10.3 --prefix /usr/local/bin --with-compose --compose-version 1.28.2 --compose-mirror daocloud --compose-prefix /usr/local/bin
+./install-docker.sh --mirror Tuna --version 20.10.9 --prefix /usr/local/bin --with-compose --compose-version 1.29.2 --compose-mirror daocloud --compose-prefix /usr/local/bin
 ```
 
 * --dry-run
