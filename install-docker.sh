@@ -228,6 +228,9 @@ case "$mirror" in
 	ynu)
 		DOWNLOAD_URL="https://mirrors.ynu.edu.cn/docker-ce"
 		;;
+	bupt)
+		DOWNLOAD_URL="https://mirrors.bupt.edu.cn/docker-ce"
+		;;
 esac
 
 case "$compose_mirror" in

@@ -73,6 +73,7 @@ chmod +x ./install-docker.sh
 | xtom        | <https://mirrors.xtom.com.hk/docker-ce/>          |
 | pku         | <https://mirrors.pku.edu.cn/docker-ce/>           |
 | ynu         | <https://mirrors.ynu.edu.cn/docker-ce/>           |
+| bupt        | <https://mirrors.bupt.edu.cn/docker-ce/>          |
 
 * --with-compose
 
