@@ -2,11 +2,11 @@
 
 This is a script to install docker binaries. It can help you quickly extract the docker binaries from various mirrors without the steps of setting up the repository.
 
-Supports installation on more operating systems, centos, debian, ubuntu, openSUSE, Kali, archlinux, manjaro, gentoo, Alpine.
+Supports installation on more operating systems, centos, debian, ubuntu, openSUSE, Kali, archlinux, manjaro, gentoo, Alpine, voidlinux, artixlinux, antixlinux.
 
 Support docker-compose binary installation.
 
-Support systemd、openrc.
+Support systemd、openrc、runit.
 
 ## Quickstart
 
@@ -105,6 +105,8 @@ chmod +x ./install-docker.sh
 | --no-daemon-json      | do not install daemon.json                    |                                           |
 | --with-openrc         | will install dockerd`s init.d files           |                                           |
 | --openrc-mirror       | mirror of dockerd`s init.d files              | jsdelivr                                  |
+| --with-runit          | will install dockerd`s runit files            |                                           |
+| --runit-mirror        | mirror of dockerd`s runit files               | jsdelivr                                  |
 | --dry-run             | dry run                                       |                                           |
 | --override-existing   | override existing                             |                                           |
 

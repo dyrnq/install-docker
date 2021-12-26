@@ -26,6 +26,8 @@ DEFAULT_DAEMON_JSON_VAR="{\"live-restore\":true,\"registry-mirrors\":[\"https://
 OPENRC_DOCKER_CONFD="https://cdn.jsdelivr.net/gh/alpinelinux/aports@master/community/docker/docker.confd"
 OPENRC_DOCKER_INITD="https://cdn.jsdelivr.net/gh/alpinelinux/aports@master/community/docker/docker.initd"
 
+RUNIT_DOCKER_RUN="https://cdn.jsdelivr.net/gh/void-linux/void-packages@master/srcpkgs/moby/files/docker/run"
+
 if [ -z "$CHANNEL" ]; then
 	CHANNEL=$DEFAULT_CHANNEL_VALUE
 fi
@@ -83,11 +85,13 @@ mirror=''
 compose_mirror=''
 systemd_mirror=''
 openrc_mirror=''
+runit_mirror=''
 SYSTEMD=${DEFAULT_SYSTEMD:-}
 DRY_RUN=${DRY_RUN:-}
 OVERRIDE_EXISTING=${OVERRIDE_EXISTING:-}
 WITH_COMPOSE=${WITH_COMPOSE:-}
 WITH_OPENRC=${WITH_OPENRC:-}
+WITH_RUNIT=${WITH_RUNIT:-}
 WRITE_DAEMON_JSON_FILE=${DEFAULT_WRITE_DAEMON_JSON_FILE:-}
 DAEMON_JSON_FILE=${DAEMON_JSON_FILE:-}
 FLAG_PREFIX=${FLAG_PREFIX:-}
@@ -145,14 +149,19 @@ while [ $# -gt 0 ]; do
 			;;
 		--systemd-mirror)
 			systemd_mirror_opt="$2"
-			systemd_mirror="$(echo "$systemd_mirror_opt" | tr '[:upper:]' '[:lower:]')"			
+			systemd_mirror="$(echo "$systemd_mirror_opt" | tr '[:upper:]' '[:lower:]')"
 			shift
 			;;
 		--openrc-mirror)
 			openrc_mirror_opt="$2"
-			openrc_mirror="$(echo "$openrc_mirror_opt" | tr '[:upper:]' '[:lower:]')"			
+			openrc_mirror="$(echo "$openrc_mirror_opt" | tr '[:upper:]' '[:lower:]')"
 			shift
 			;;
+		--runit-mirror)
+			runit_mirror_opt="$2"
+			runit_mirror="$(echo "$runit_mirror_opt" | tr '[:upper:]' '[:lower:]')"
+			shift
+			;;			
 		--systemd-prefix)
 			SYSTEMD_PREFIX="$2"
 			shift
@@ -162,7 +171,10 @@ while [ $# -gt 0 ]; do
 			;;
 		--with-openrc)
 			WITH_OPENRC=1
-			;;	
+			;;
+		--with-runit)
+			WITH_RUNIT=1
+			;;
 		--no-mkdir)
 			NO_MKDIR=1
 			;;
@@ -272,6 +284,21 @@ case "$openrc_mirror" in
 		;;
 esac
 
+case "$runit_mirror" in
+	github)
+		RUNIT_DOCKER_RUN="https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/moby/files/docker/run"
+		;;
+	jsdelivr)
+		RUNIT_DOCKER_RUN="https://cdn.jsdelivr.net/gh/void-linux/void-packages@master/srcpkgs/moby/files/docker/run"
+		;;
+	ghproxy)
+		RUNIT_DOCKER_RUN="https://ghproxy.com/https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/moby/files/docker/run"
+		;;	
+	artixlinux)
+		RUNIT_DOCKER_RUN="https://gitea.artixlinux.org/packagesD/docker-runit/raw/branch/master/trunk/docker.run"
+		;;
+esac
+
 command_exists() {
 	command -v "$@" > /dev/null 2>&1
 }
@@ -333,6 +360,14 @@ is_systemd() {
 
 is_with_openrc() {
 	if [ -z "$WITH_OPENRC" ]; then
+		return 1
+	else
+		return 0
+	fi
+}
+
+is_with_runit() {
+	if [ -z "$WITH_RUNIT" ]; then
 		return 1
 	else
 		return 0
@@ -504,6 +539,21 @@ fi
 		fi
 		$sh_c "rc-update add docker > /dev/null 2>&1"
 		$sh_c "rc-service docker start > /dev/null 2>&1"
+	fi
+
+	# runit compatible
+	if [ "$(cat /proc/1/comm 2> /dev/null)" = "runit" ] && is_with_runit; then
+		sv="/etc/sv"
+		for sv_path in "/etc/sv" "/etc/runit/sv"; do
+			if test -d "${sv_path}"; then
+				sv="${sv_path}";
+				break;
+			fi
+		done
+		$sh_c "mkdir -p ${sv}/docker"
+		$sh_c "curl --retry 3 -fsSL -o ${sv}/docker/run ${RUNIT_DOCKER_RUN}"
+		$sh_c "chmod +x ${sv}/docker/run"
+		$sh_c "ln -s -f ${sv}/docker /etc/runit/runsvdir/current/"
 	fi
 }
 
