@@ -243,6 +243,9 @@ case "$mirror" in
 	bupt)
 		DOWNLOAD_URL="https://mirrors.bupt.edu.cn/docker-ce"
 		;;
+	njtech)
+		DOWNLOAD_URL="https://mirrors.njtech.edu.cn/docker-ce"
+		;;
 esac
 
 case "$compose_mirror" in

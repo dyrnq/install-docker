@@ -11,13 +11,13 @@ Support systemd、openrc、runit.
 ## Quickstart
 
 ```bash
-curl -fsSL https://ghproxy.com/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh | bash -s docker --mirror Tuna --version 20.10.9
+curl -fsSL https://ghproxy.com/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh | bash -s docker --mirror Tuna --version 20.10.18
 ```
 
 or with docker-compose
 
 ```bash
-curl -fsSL https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh | bash -s docker --mirror Tuna --version 20.10.9 --with-compose --compose-version 1.29.2 --compose-mirror daocloud
+curl -fsSL https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh | bash -s docker --mirror Tuna --version 20.10.18 --with-compose --compose-version 1.29.2 --compose-mirror daocloud
 ```
 
 ## Get
@@ -47,7 +47,7 @@ chmod +x ./install-docker.sh
 * --version
 
 ```bash
-./install-docker.sh --mirror Tuna --version 20.10.9 --prefix /usr/local/bin
+./install-docker.sh --mirror Tuna --version 20.10.18 --prefix /usr/local/bin
 ```
 
 * --mirror
@@ -74,11 +74,12 @@ chmod +x ./install-docker.sh
 | pku         | <https://mirrors.pku.edu.cn/docker-ce/>           |
 | ynu         | <https://mirrors.ynu.edu.cn/docker-ce/>           |
 | bupt        | <https://mirrors.bupt.edu.cn/docker-ce/>          |
+| njtech      | <https://mirrors.njtech.edu.cn/docker-ce>         |
 
 * --with-compose
 
 ```bash
-./install-docker.sh --mirror Tuna --version 20.10.9 --prefix /usr/local/bin --with-compose --compose-version 1.29.2 --compose-mirror daocloud --compose-prefix /usr/local/bin
+./install-docker.sh --mirror Tuna --version 20.10.18 --prefix /usr/local/bin --with-compose --compose-version 1.29.2 --compose-mirror daocloud --compose-prefix /usr/local/bin
 ```
 
 * --dry-run
