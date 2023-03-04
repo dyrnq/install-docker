@@ -16,7 +16,7 @@ DEFAULT_COMPOSE_PREFIX=${DEFAULT_PREFIX}
 DEFAULT_CHANNEL_VALUE="stable"
 DEFAULT_SYSTEMD_DOCKER_SERVICE="https://cdn.jsdelivr.net/gh/docker/docker-ce@master/components/engine/contrib/init/systemd/docker.service"
 DEFAULT_SYSTEMD_DOCKER_SOCKET="https://cdn.jsdelivr.net/gh/docker/docker-ce@master/components/engine/contrib/init/systemd/docker.socket"
-DEFAULT_SYSTEMD_CONTAINERD_SERVICE="https://cdn.jsdelivr.net/gh/containerd/containerd@master/containerd.service"
+DEFAULT_SYSTEMD_CONTAINERD_SERVICE="https://cdn.jsdelivr.net/gh/containerd/containerd@main/containerd.service"
 DEFAULT_SYSTEMD_PREFIX=/usr/lib/systemd/system
 DEFAULT_SYSTEMD=1
 DEFAULT_WRITE_DAEMON_JSON_FILE=1
@@ -258,17 +258,17 @@ case "$systemd_mirror" in
 	github)
 		SYSTEMD_DOCKER_SERVICE="https://raw.githubusercontent.com/docker/docker-ce/master/components/engine/contrib/init/systemd/docker.service"
 		SYSTEMD_DOCKER_SOCKET="https://raw.githubusercontent.com/docker/docker-ce/master/components/engine/contrib/init/systemd/docker.socket"
-		SYSTEMD_CONTAINERD_SERVICE="https://raw.githubusercontent.com/containerd/containerd/master/containerd.service"
+		SYSTEMD_CONTAINERD_SERVICE="https://raw.githubusercontent.com/containerd/containerd/main/containerd.service"
 		;;
 	jsdelivr)
 		SYSTEMD_DOCKER_SERVICE="https://cdn.jsdelivr.net/gh/docker/docker-ce@master/components/engine/contrib/init/systemd/docker.service"
 		SYSTEMD_DOCKER_SOCKET="https://cdn.jsdelivr.net/gh/docker/docker-ce@master/components/engine/contrib/init/systemd/docker.socket"
-		SYSTEMD_CONTAINERD_SERVICE="https://cdn.jsdelivr.net/gh/containerd/containerd@master/containerd.service"
+		SYSTEMD_CONTAINERD_SERVICE="https://cdn.jsdelivr.net/gh/containerd/containerd@main/containerd.service"
 		;;
 	ghproxy)
 		SYSTEMD_DOCKER_SERVICE="https://ghproxy.com/https://raw.githubusercontent.com/docker/docker-ce/master/components/engine/contrib/init/systemd/docker.service"
 		SYSTEMD_DOCKER_SOCKET="https://ghproxy.com/https://raw.githubusercontent.com/docker/docker-ce/master/components/engine/contrib/init/systemd/docker.socket"
-		SYSTEMD_CONTAINERD_SERVICE="https://ghproxy.com/https://raw.githubusercontent.com/containerd/containerd/master/containerd.service"
+		SYSTEMD_CONTAINERD_SERVICE="https://ghproxy.com/https://raw.githubusercontent.com/containerd/containerd/main/containerd.service"
 		;;
 esac
 
