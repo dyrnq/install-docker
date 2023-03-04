@@ -74,7 +74,8 @@ chmod +x ./install-docker.sh
 | pku         | <https://mirrors.pku.edu.cn/docker-ce/>           |
 | ynu         | <https://mirrors.ynu.edu.cn/docker-ce/>           |
 | bupt        | <https://mirrors.bupt.edu.cn/docker-ce/>          |
-| njtech      | <https://mirrors.njtech.edu.cn/docker-ce>         |
+| njtech      | <https://mirrors.njtech.edu.cn/docker-ce/>        |
+| qlu         | <https://mirrors.qlu.edu.cn/docker-ce/>           |
 
 * --with-compose
 

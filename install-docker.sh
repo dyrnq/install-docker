@@ -246,6 +246,9 @@ case "$mirror" in
 	njtech)
 		DOWNLOAD_URL="https://mirrors.njtech.edu.cn/docker-ce"
 		;;
+	qlu)
+		DOWNLOAD_URL="https://mirrors.qlu.edu.cn/docker-ce"
+		;;
 esac
 
 case "$compose_mirror" in
