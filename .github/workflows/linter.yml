@@ -46,7 +46,7 @@ jobs:
       # Run Linter against code base #
       ################################
       - name: Lint Code Base
-        uses: github/super-linter@v4.9.7
+        uses: github/super-linter@v4.10.1
         env:
           SHELLCHECK_OPTS: "-e SC1091 -e SC2295"
           VALIDATE_ALL_CODEBASE: false
@@ -54,3 +54,4 @@ jobs:
           ERROR_ON_MISSING_EXEC_BIT: true
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FILTER_REGEX_EXCLUDE: README.md
