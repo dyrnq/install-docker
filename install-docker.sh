@@ -21,7 +21,7 @@ DEFAULT_SYSTEMD_PREFIX=/usr/lib/systemd/system
 DEFAULT_SYSTEMD=1
 DEFAULT_WRITE_DAEMON_JSON_FILE=1
 DEFAULT_DAEMON_JSON_FILE_PREFIX="/etc/docker"
-DEFAULT_DAEMON_JSON_VAR="{\"live-restore\":true,\"registry-mirrors\":[\"https://docker.mirrors.ustc.edu.cn\"],\"storage-driver\":\"overlay2\",\"storage-opts\":[\"overlay2.override_kernel_check=true\"],\"log-level\":\"info\",\"log-driver\":\"json-file\",\"log-opts\":{\"max-size\":\"100m\"}}"
+DEFAULT_DAEMON_JSON_VAR="{\"live-restore\":true,\"registry-mirrors\":[\"https://docker.mirrors.ustc.edu.cn\"],\"storage-driver\":\"overlay2\",\"log-level\":\"info\",\"log-driver\":\"json-file\",\"log-opts\":{\"max-size\":\"100m\"}}"
 
 OPENRC_DOCKER_CONFD="https://cdn.jsdelivr.net/gh/alpinelinux/aports@master/community/docker/docker.confd"
 OPENRC_DOCKER_INITD="https://cdn.jsdelivr.net/gh/alpinelinux/aports@master/community/docker/docker.initd"
