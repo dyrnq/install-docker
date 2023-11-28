@@ -269,9 +269,9 @@ case "$systemd_mirror" in
 		SYSTEMD_CONTAINERD_SERVICE="https://cdn.jsdelivr.net/gh/containerd/containerd@main/containerd.service"
 		;;
 	ghproxy)
-		SYSTEMD_DOCKER_SERVICE="https://ghproxy.com/https://raw.githubusercontent.com/docker/docker-ce/master/components/engine/contrib/init/systemd/docker.service"
-		SYSTEMD_DOCKER_SOCKET="https://ghproxy.com/https://raw.githubusercontent.com/docker/docker-ce/master/components/engine/contrib/init/systemd/docker.socket"
-		SYSTEMD_CONTAINERD_SERVICE="https://ghproxy.com/https://raw.githubusercontent.com/containerd/containerd/main/containerd.service"
+		SYSTEMD_DOCKER_SERVICE="https://mirror.ghproxy.com/https://raw.githubusercontent.com/docker/docker-ce/master/components/engine/contrib/init/systemd/docker.service"
+		SYSTEMD_DOCKER_SOCKET="https://mirror.ghproxy.com/https://raw.githubusercontent.com/docker/docker-ce/master/components/engine/contrib/init/systemd/docker.socket"
+		SYSTEMD_CONTAINERD_SERVICE="https://mirror.ghproxy.com/https://raw.githubusercontent.com/containerd/containerd/main/containerd.service"
 		;;
 esac
 
@@ -285,8 +285,8 @@ case "$openrc_mirror" in
 		OPENRC_DOCKER_INITD="https://cdn.jsdelivr.net/gh/alpinelinux/aports@master/community/docker/docker.initd"
 		;;
 	ghproxy)
-		OPENRC_DOCKER_CONFD="https://ghproxy.com/https://raw.githubusercontent.com/alpinelinux/aports/master/community/docker/docker.confd"
-		OPENRC_DOCKER_INITD="https://ghproxy.com/https://raw.githubusercontent.com/alpinelinux/aports/master/community/docker/docker.initd"
+		OPENRC_DOCKER_CONFD="https://mirror.ghproxy.com/https://raw.githubusercontent.com/alpinelinux/aports/master/community/docker/docker.confd"
+		OPENRC_DOCKER_INITD="https://mirror.ghproxy.com/https://raw.githubusercontent.com/alpinelinux/aports/master/community/docker/docker.initd"
 		;;
 esac
 
@@ -298,7 +298,7 @@ case "$runit_mirror" in
 		RUNIT_DOCKER_RUN="https://cdn.jsdelivr.net/gh/void-linux/void-packages@master/srcpkgs/moby/files/docker/run"
 		;;
 	ghproxy)
-		RUNIT_DOCKER_RUN="https://ghproxy.com/https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/moby/files/docker/run"
+		RUNIT_DOCKER_RUN="https://mirror.ghproxy.com/https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/moby/files/docker/run"
 		;;	
 	artixlinux)
 		RUNIT_DOCKER_RUN="https://gitea.artixlinux.org/packagesD/docker-runit/raw/branch/master/trunk/docker.run"

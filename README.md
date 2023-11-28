@@ -11,7 +11,7 @@ Support systemd、openrc、runit.
 ## Quickstart
 
 ```bash
-curl -fsSL https://ghproxy.com/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh | bash -s docker --mirror Tuna --version 20.10.18
+curl -fsSL https://mirror.ghproxy.com/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh | bash -s docker --mirror Tuna --version 20.10.18
 ```
 
 or with docker-compose
@@ -37,7 +37,7 @@ curl -fsSL -O https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-dock
 
 or
 
-curl -fsSL -O https://ghproxy.com/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh
+curl -fsSL -O https://mirror.ghproxy.com/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh
 
 chmod +x ./install-docker.sh
 ```
