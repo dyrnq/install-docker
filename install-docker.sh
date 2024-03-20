@@ -253,7 +253,7 @@ esac
 
 case "$compose_mirror" in
 	daocloud)
-		COMPOSE_DOWNLOAD_URL="https://get.daocloud.io/docker/compose"
+		COMPOSE_DOWNLOAD_URL="https://files.m.daocloud.io/github.com/docker/compose"
 		;;
 esac
 
@@ -483,8 +483,27 @@ do_install_static() {
 	
 	$sh_c "curl -fsSL ${url} | tar -xvz --strip-components 1 --directory=${PREFIX}"
 	if is_with_compose; then
-		compose_url="${COMPOSE_DOWNLOAD_URL}/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)"
-		$sh_c "curl -fsSL $compose_url -o $COMPOSE_PREFIX/docker-compose"
+		
+		if [[ $COMPOSE_VERSION =~ ^v1.* ]]; then
+			COMPOSE_VERSION="${COMPOSE_VERSION:1}"
+		fi
+
+		if [[ $COMPOSE_VERSION =~ ^2.* ]]; then
+			COMPOSE_VERSION="v${COMPOSE_VERSION}"
+		fi
+
+		if [[ $COMPOSE_VERSION =~ ^v2.* || $COMPOSE_VERSION =~ ^2.* ]]; then
+			uname_kernel=$(uname -s);
+			compose_file="docker-compose-${uname_kernel,}-$(uname -m)";
+		else
+			compose_file="docker-compose-$(uname -s)-$(uname -m)";
+		fi
+
+
+		compose_url="${COMPOSE_DOWNLOAD_URL}/releases/download/${COMPOSE_VERSION}/${compose_file}"
+		# https://github.com/docker/compose/releases/download/v2.24.7/docker-compose-linux-x86_64
+		# https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64
+		$sh_c "curl -fSL --progress-bar $compose_url -o $COMPOSE_PREFIX/docker-compose"
 		$sh_c "chmod +x $COMPOSE_PREFIX/docker-compose"
 	fi
 
