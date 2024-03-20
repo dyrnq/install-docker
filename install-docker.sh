@@ -273,6 +273,11 @@ case "$systemd_mirror" in
 		SYSTEMD_DOCKER_SOCKET="https://mirror.ghproxy.com/https://raw.githubusercontent.com/docker/docker-ce/master/components/engine/contrib/init/systemd/docker.socket"
 		SYSTEMD_CONTAINERD_SERVICE="https://mirror.ghproxy.com/https://raw.githubusercontent.com/containerd/containerd/main/containerd.service"
 		;;
+	daocloud)
+		SYSTEMD_DOCKER_SERVICE="https://files.m.daocloud.io/github.com/docker/docker-ce/raw/master/components/engine/contrib/init/systemd/docker.service"
+		SYSTEMD_DOCKER_SOCKET="https://files.m.daocloud.io/github.com/docker/docker-ce/raw/master/components/engine/contrib/init/systemd/docker.socket"
+		SYSTEMD_CONTAINERD_SERVICE="https://files.m.daocloud.io/github.com/containerd/containerd/raw/main/containerd.service"
+		;;
 esac
 
 case "$openrc_mirror" in
@@ -288,6 +293,10 @@ case "$openrc_mirror" in
 		OPENRC_DOCKER_CONFD="https://mirror.ghproxy.com/https://raw.githubusercontent.com/alpinelinux/aports/master/community/docker/docker.confd"
 		OPENRC_DOCKER_INITD="https://mirror.ghproxy.com/https://raw.githubusercontent.com/alpinelinux/aports/master/community/docker/docker.initd"
 		;;
+	daocloud)
+		OPENRC_DOCKER_CONFD="https://files.m.daocloud.io/github.com/alpinelinux/aports/raw/master/community/docker/docker.confd"
+		OPENRC_DOCKER_INITD="https://files.m.daocloud.io/github.com/alpinelinux/aports/raw/master/community/docker/docker.initd"
+		;;
 esac
 
 case "$runit_mirror" in
@@ -302,6 +311,9 @@ case "$runit_mirror" in
 		;;	
 	artixlinux)
 		RUNIT_DOCKER_RUN="https://gitea.artixlinux.org/packagesD/docker-runit/raw/branch/master/trunk/docker.run"
+		;;
+	daocloud)
+		RUNIT_DOCKER_RUN="https://files.m.daocloud.io/github.com/void-linux/void-packages/raw/master/srcpkgs/moby/files/docker/run"
 		;;
 esac
 
