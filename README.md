@@ -20,6 +20,20 @@ or with docker-compose
 curl -fsSL https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh | bash -s docker --mirror Tuna --version 25.0.4 --with-compose --compose-version 1.29.2 --compose-mirror daocloud
 ```
 
+or with docker-compose plugin
+
+```bash
+mkdir -p /usr/local/lib/docker/cli-plugins
+curl -fsSL https://mirror.ghproxy.com/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh | bash -s docker \
+--mirror tencent \
+--version 25.0.4 \
+--with-compose \
+--compose-version 2.24.7 \
+--compose-mirror daocloud \
+--compose-prefix /usr/local/lib/docker/cli-plugins \
+--systemd-mirror "ghproxy"
+```
+
 ## Get
 
 ```bash
