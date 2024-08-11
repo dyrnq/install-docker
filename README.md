@@ -74,7 +74,7 @@ chmod +x ./install-docker.sh
 | huaweicloud | <https://mirrors.huaweicloud.com/docker-ce/>      |
 | tuna        | <https://mirrors.tuna.tsinghua.edu.cn/docker-ce/> |
 | tsinghua    | <https://mirrors.tuna.tsinghua.edu.cn/docker-ce/> |
-| opentuna    | <https://opentuna.cn/docker-ce/>                  |
+| nyist       | <https://mirror.nyist.edu.cn/docker-ce/>          |
 | ustc        | <https://mirrors.ustc.edu.cn/docker-ce/>          |
 | sjtu        | <https://mirror.sjtu.edu.cn/docker-ce/>           |
 | zju         | <https://mirrors.zju.edu.cn/docker-ce/>           |
