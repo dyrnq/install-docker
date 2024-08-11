@@ -309,9 +309,6 @@ case "$runit_mirror" in
 	ghproxy)
 		RUNIT_DOCKER_RUN="https://mirror.ghproxy.com/https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/moby/files/docker/run"
 		;;	
-	artixlinux)
-		RUNIT_DOCKER_RUN="https://gitea.artixlinux.org/packagesD/docker-runit/raw/branch/master/trunk/docker.run"
-		;;
 	daocloud)
 		RUNIT_DOCKER_RUN="https://files.m.daocloud.io/github.com/void-linux/void-packages/raw/master/srcpkgs/moby/files/docker/run"
 		;;
