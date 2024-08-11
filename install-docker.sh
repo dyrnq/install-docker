@@ -201,8 +201,8 @@ case "$mirror" in
 	tsinghua|tuna)
 		DOWNLOAD_URL="https://mirrors.tuna.tsinghua.edu.cn/docker-ce"
 		;;
-	opentuna)
-		DOWNLOAD_URL="https://opentuna.cn/docker-ce"
+	nyist)
+		DOWNLOAD_URL="https://mirror.nyist.edu.cn/docker-ce"
 		;;
 	ustc)
 		DOWNLOAD_URL="https://mirrors.ustc.edu.cn/docker-ce"
