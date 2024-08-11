@@ -161,7 +161,7 @@ while [ $# -gt 0 ]; do
 			runit_mirror_opt="$2"
 			runit_mirror="$(echo "$runit_mirror_opt" | tr '[:upper:]' '[:lower:]')"
 			shift
-			;;			
+			;;
 		--systemd-prefix)
 			SYSTEMD_PREFIX="$2"
 			shift
