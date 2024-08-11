@@ -11,13 +11,20 @@ Support systemd、openrc、runit.
 ## Quickstart
 
 ```bash
-curl -fsSL https://mirror.ghproxy.com/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh | bash -s docker --mirror Tuna --version 25.0.4
+curl -fsSL https://mirror.ghproxy.com/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh | bash -s docker \
+--mirror Tuna \
+--version 27.1.1
 ```
 
 or with docker-compose
 
 ```bash
-curl -fsSL https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh | bash -s docker --mirror Tuna --version 25.0.4 --with-compose --compose-version 1.29.2 --compose-mirror daocloud
+curl -fsSL https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh | bash -s docker \
+--mirror Tuna \
+--version 27.1.1 \
+--with-compose \
+--compose-version 2.29.1 \
+--compose-mirror daocloud
 ```
 
 or with docker-compose plugin
@@ -26,9 +33,9 @@ or with docker-compose plugin
 mkdir -p /usr/local/lib/docker/cli-plugins
 curl -fsSL https://mirror.ghproxy.com/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh | bash -s docker \
 --mirror tencent \
---version 25.0.4 \
+--version 27.1.1 \
 --with-compose \
---compose-version 2.24.7 \
+--compose-version 2.29.1 \
 --compose-mirror daocloud \
 --compose-prefix /usr/local/lib/docker/cli-plugins \
 --systemd-mirror "ghproxy"
@@ -61,12 +68,12 @@ chmod +x ./install-docker.sh
 * --version
 
 ```bash
-./install-docker.sh --mirror Tuna --version 25.0.4 --prefix /usr/local/bin
+./install-docker.sh --mirror Tuna --version 27.1.1 --prefix /usr/local/bin
 ```
 
 * --mirror
 
-| mirror      | linux(x86_64)                                     |
+| mirror      | mirror web address                                |
 |-------------|---------------------------------------------------|
 | aliyun      | <https://mirrors.aliyun.com/docker-ce/>           |
 | 163         | <https://mirrors.163.com/docker-ce/>              |
@@ -94,7 +101,7 @@ chmod +x ./install-docker.sh
 * --with-compose
 
 ```bash
-./install-docker.sh --mirror Tuna --version 25.0.4 --prefix /usr/local/bin --with-compose --compose-version 1.29.2 --compose-mirror daocloud --compose-prefix /usr/local/bin
+./install-docker.sh --mirror Tuna --version 27.1.1 --prefix /usr/local/bin --with-compose --compose-version 2.29.1 --compose-mirror daocloud --compose-prefix /usr/local/bin
 ```
 
 * --dry-run
@@ -130,3 +137,5 @@ chmod +x ./install-docker.sh
 
 * [https://get.docker.com/](https://get.docker.com/)
 * [https://mirrorz.org/](https://mirrorz.org/)
+* <https://github.com/moby/moby>
+* <https://github.com/docker/compose>
