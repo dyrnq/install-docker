@@ -255,6 +255,9 @@ case "$compose_mirror" in
 	daocloud)
 		COMPOSE_DOWNLOAD_URL="https://files.m.daocloud.io/github.com/docker/compose"
 		;;
+	*)
+		COMPOSE_DOWNLOAD_URL="${compose_mirror}"
+		;;
 esac
 
 case "$systemd_mirror" in
