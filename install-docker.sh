@@ -507,26 +507,24 @@ do_install_static() {
 	
 	$sh_c "curl -fsSL ${url} | tar -xvz --strip-components 1 --directory=${PREFIX}"
 	if is_with_compose; then
-		
-		if [[ $COMPOSE_VERSION =~ ^v1.* ]]; then
-			COMPOSE_VERSION="${COMPOSE_VERSION:1}"
-		fi
-
-		if [[ $COMPOSE_VERSION =~ ^2.* ]]; then
-			COMPOSE_VERSION="v${COMPOSE_VERSION}"
-		fi
-
-		if [[ $COMPOSE_VERSION =~ ^v2.* || $COMPOSE_VERSION =~ ^2.* ]]; then
-			uname_kernel=$(uname -s);
-			compose_file="docker-compose-${uname_kernel,}-$(uname -m)";
+		# https://github.com/docker/compose/releases/download/v5.1.3/docker-compose-linux-x86_64
+		# https://github.com/docker/compose/releases/download/v2.40.2/docker-compose-linux-x86_64
+		# https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64
+		if [[ $COMPOSE_VERSION == v* ]]; then
+			COMPOSE_VERSION_NUM="${COMPOSE_VERSION#v}"
 		else
-			compose_file="docker-compose-$(uname -s)-$(uname -m)";
+			COMPOSE_VERSION_NUM="${COMPOSE_VERSION}"
+		fi
+		uname_kernel=$(uname -s);
+		if [[ $COMPOSE_VERSION_NUM == 1* ]]; then
+			compose_file="docker-compose-${uname_kernel}-$(uname -m)";
+		else
+			compose_file="docker-compose-${uname_kernel,}-$(uname -m)";
 		fi
 
 
 		compose_url="${COMPOSE_DOWNLOAD_URL}/releases/download/${COMPOSE_VERSION}/${compose_file}"
-		# https://github.com/docker/compose/releases/download/v2.24.7/docker-compose-linux-x86_64
-		# https://github.com/docker/compose/releases/download/1.29.2/docker-compose-Linux-x86_64
+
 		$sh_c "curl -fSL --progress-bar $compose_url -o $COMPOSE_PREFIX/docker-compose"
 		$sh_c "chmod +x $COMPOSE_PREFIX/docker-compose"
 	fi
