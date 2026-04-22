@@ -518,12 +518,14 @@ do_install_static() {
 		uname_kernel=$(uname -s);
 		if [[ $COMPOSE_VERSION_NUM == 1* ]]; then
 			compose_file="docker-compose-${uname_kernel}-$(uname -m)";
+			COMPOSE_VERSION_PATH="${COMPOSE_VERSION_NUM}"
 		else
 			compose_file="docker-compose-${uname_kernel,}-$(uname -m)";
+			COMPOSE_VERSION_PATH="v${COMPOSE_VERSION_NUM}"
 		fi
 
 
-		compose_url="${COMPOSE_DOWNLOAD_URL}/releases/download/${COMPOSE_VERSION}/${compose_file}"
+		compose_url="${COMPOSE_DOWNLOAD_URL}/releases/download/${COMPOSE_VERSION_PATH}/${compose_file}"
 
 		$sh_c "curl -fSL --progress-bar $compose_url -o $COMPOSE_PREFIX/docker-compose"
 		$sh_c "chmod +x $COMPOSE_PREFIX/docker-compose"
