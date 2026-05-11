@@ -65,16 +65,16 @@ chmod +x ./install-docker.sh
 
 ## Usage
 
-* --version
+- --version
 
 ```bash
 ./install-docker.sh --mirror Tuna --version 27.1.1 --prefix /usr/local/bin
 ```
 
-* --mirror
+- --mirror
 
 | mirror      | mirror web address                                |
-|-------------|---------------------------------------------------|
+| ----------- | ------------------------------------------------- |
 | aliyun      | <https://mirrors.aliyun.com/docker-ce/>           |
 | 163         | <https://mirrors.163.com/docker-ce/>              |
 | tencent     | <https://mirrors.tencent.com/docker-ce/>          |
@@ -86,25 +86,25 @@ chmod +x ./install-docker.sh
 | sjtu        | <https://mirror.sjtu.edu.cn/docker-ce/>           |
 | zju         | <https://mirrors.zju.edu.cn/docker-ce/>           |
 | nju         | <https://mirrors.nju.edu.cn/docker-ce/>           |
-| njupt       | <https://mirrors.njupt.edu.cn/docker-ce/>         |
+| ~~njupt~~   | <https://mirrors.njupt.edu.cn/docker-ce/>         |
 | bfsu        | <https://mirrors.bfsu.edu.cn/docker-ce/>          |
 | nwafu       | <https://mirrors.nwafu.edu.cn/docker-ce/>         |
 | sustech     | <https://mirrors.sustech.edu.cn/docker-ce/>       |
 | hit         | <https://mirrors.hit.edu.cn/docker-ce/>           |
 | xtom        | <https://mirrors.xtom.com.hk/docker-ce/>          |
 | pku         | <https://mirrors.pku.edu.cn/docker-ce/>           |
-| ynu         | <https://mirrors.ynu.edu.cn/docker-ce/>           |
-| bupt        | <https://mirrors.bupt.edu.cn/docker-ce/>          |
+| ~~ynu~~     | <https://mirrors.ynu.edu.cn/docker-ce/>           |
+| ~~bupt~~    | <https://mirrors.bupt.edu.cn/docker-ce/>          |
 | njtech      | <https://mirrors.njtech.edu.cn/docker-ce/>        |
-| qlu         | <https://mirrors.qlu.edu.cn/docker-ce/>           |
+| ~~qlu~~     | <https://mirrors.qlu.edu.cn/docker-ce/>           |
 
-* --with-compose
+- --with-compose
 
 ```bash
 ./install-docker.sh --mirror Tuna --version 27.1.1 --prefix /usr/local/bin --with-compose --compose-version 2.29.1 --compose-mirror daocloud --compose-prefix /usr/local/bin
 ```
 
-* --dry-run
+- --dry-run
 
 ```bash
 ./install-docker.sh --mirror Tuna --dry-run
@@ -112,30 +112,30 @@ chmod +x ./install-docker.sh
 
 ## Command-Line Options
 
-| Name                  | Description                                   | Default                                   |
-| ----------            | ----------------                              | ----------------------                    |
-| --mirror              | mirror of docker binary download url          |                                           |
-| --prefix              | docker binary installation directory          | /usr/local/bin                            |
-| --version             | docker binary version                         | 20.10.2                                   |
-| --with-compose        | install docker-compose                        |                                           |
-| --compose-prefix      | docker-compose installation directory         | /usr/local/bin                            |
-| --compose-version     | docker-compose version                        | 1.28.2                                    |
-| --compose-mirror      | mirror of docker-compose download url         |                                           |
-| --systemd-mirror      | mirror of dockerd`s systemd unit files        | jsdelivr                                  |
-| --no-systemd          | do not install dockerd`s systemd unit files   |                                           |
-| --daemon-json         | daemon.json path or url                       |                                           |
-| --daemon-json-prefix  | daemon.json path                              | /etc/docker                               |
-| --no-daemon-json      | do not install daemon.json                    |                                           |
-| --with-openrc         | will install dockerd`s init.d files           |                                           |
-| --openrc-mirror       | mirror of dockerd`s init.d files              | jsdelivr                                  |
-| --with-runit          | will install dockerd`s runit files            |                                           |
-| --runit-mirror        | mirror of dockerd`s runit files               | jsdelivr                                  |
-| --dry-run             | dry run                                       |                                           |
-| --override-existing   | override existing                             |                                           |
+| Name                 | Description                                 | Default        |
+| -------------------- | ------------------------------------------- | -------------- |
+| --mirror             | mirror of docker binary download url        |                |
+| --prefix             | docker binary installation directory        | /usr/local/bin |
+| --version            | docker binary version                       | 20.10.2        |
+| --with-compose       | install docker-compose                      |                |
+| --compose-prefix     | docker-compose installation directory       | /usr/local/bin |
+| --compose-version    | docker-compose version                      | 1.28.2         |
+| --compose-mirror     | mirror of docker-compose download url       |                |
+| --systemd-mirror     | mirror of dockerd`s systemd unit files      | jsdelivr       |
+| --no-systemd         | do not install dockerd`s systemd unit files |                |
+| --daemon-json        | daemon.json path or url                     |                |
+| --daemon-json-prefix | daemon.json path                            | /etc/docker    |
+| --no-daemon-json     | do not install daemon.json                  |                |
+| --with-openrc        | will install dockerd`s init.d files         |                |
+| --openrc-mirror      | mirror of dockerd`s init.d files            | jsdelivr       |
+| --with-runit         | will install dockerd`s runit files          |                |
+| --runit-mirror       | mirror of dockerd`s runit files             | jsdelivr       |
+| --dry-run            | dry run                                     |                |
+| --override-existing  | override existing                           |                |
 
 ## Tks
 
-* [https://get.docker.com/](https://get.docker.com/)
-* [https://mirrorz.org/](https://mirrorz.org/)
-* <https://github.com/moby/moby>
-* <https://github.com/docker/compose>
+- [https://get.docker.com/](https://get.docker.com/)
+- [https://mirrorz.org/](https://mirrorz.org/)
+- <https://github.com/moby/moby>
+- <https://github.com/docker/compose>

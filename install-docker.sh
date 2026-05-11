@@ -216,9 +216,6 @@ case "$mirror" in
 	nju)
 		DOWNLOAD_URL="https://mirrors.nju.edu.cn/docker-ce"
 		;;
-	njupt)
-		DOWNLOAD_URL="https://mirrors.njupt.edu.cn/docker-ce"
-		;;
 	bfsu)
 		DOWNLOAD_URL="https://mirrors.bfsu.edu.cn/docker-ce"
 		;;
@@ -237,17 +234,8 @@ case "$mirror" in
 	pku)
 		DOWNLOAD_URL="https://mirrors.pku.edu.cn/docker-ce"
 		;;
-	ynu)
-		DOWNLOAD_URL="https://mirrors.ynu.edu.cn/docker-ce"
-		;;
-	bupt)
-		DOWNLOAD_URL="https://mirrors.bupt.edu.cn/docker-ce"
-		;;
 	njtech)
 		DOWNLOAD_URL="https://mirrors.njtech.edu.cn/docker-ce"
-		;;
-	qlu)
-		DOWNLOAD_URL="https://mirrors.qlu.edu.cn/docker-ce"
 		;;
 esac
 
