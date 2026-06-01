@@ -90,7 +90,9 @@ chmod +x ./install-docker.sh
 | bfsu        | <https://mirrors.bfsu.edu.cn/docker-ce/>          |
 | nwafu       | <https://mirrors.nwafu.edu.cn/docker-ce/>         |
 | sustech     | <https://mirrors.sustech.edu.cn/docker-ce/>       |
+| xjtu        | <https://mirrors.xjtu.edu.cn/docker-ce/>          |
 | hit         | <https://mirrors.hit.edu.cn/docker-ce/>           |
+| hust        | <https://mirrors.hust.edu.cn/docker-ce/>           |
 | xtom        | <https://mirrors.xtom.com.hk/docker-ce/>          |
 | pku         | <https://mirrors.pku.edu.cn/docker-ce/>           |
 | ~~ynu~~     | <https://mirrors.ynu.edu.cn/docker-ce/>           |

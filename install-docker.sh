@@ -225,8 +225,14 @@ case "$mirror" in
 	sustech)
 		DOWNLOAD_URL="https://mirrors.sustech.edu.cn/docker-ce"
 		;;
+	xjtu)
+		DOWNLOAD_URL="https://mirrors.xjtu.edu.cn/docker-ce"
+		;;
 	hit)
 		DOWNLOAD_URL="https://mirrors.hit.edu.cn/docker-ce"
+		;;
+	hust)
+		DOWNLOAD_URL="https://mirrors.hust.edu.cn/docker-ce"
 		;;
 	xtom)
 		DOWNLOAD_URL="https://mirrors.xtom.com.hk/docker-ce"
@@ -244,7 +250,9 @@ case "$compose_mirror" in
 		COMPOSE_DOWNLOAD_URL="https://files.m.daocloud.io/github.com/docker/compose"
 		;;
 	*)
-		COMPOSE_DOWNLOAD_URL="${compose_mirror}"
+		if [ -n "$compose_mirror" ]; then
+			COMPOSE_DOWNLOAD_URL="${compose_mirror}"
+		fi
 		;;
 esac
 
@@ -270,9 +278,11 @@ case "$systemd_mirror" in
 		SYSTEMD_CONTAINERD_SERVICE="https://files.m.daocloud.io/github.com/containerd/containerd/raw/main/containerd.service"
 		;;
 	*)
-		SYSTEMD_DOCKER_SERVICE="${systemd_mirror}/https://raw.githubusercontent.com/moby/moby/master/contrib/init/systemd/docker.service"
-		SYSTEMD_DOCKER_SOCKET="${systemd_mirror}/https://raw.githubusercontent.com/moby/moby/master/contrib/init/systemd/docker.socket"
-		SYSTEMD_CONTAINERD_SERVICE="${systemd_mirror}/https://raw.githubusercontent.com/containerd/containerd/main/containerd.service"
+		if [ -n "$systemd_mirror" ]; then
+			SYSTEMD_DOCKER_SERVICE="${systemd_mirror}/https://raw.githubusercontent.com/moby/moby/master/contrib/init/systemd/docker.service"
+			SYSTEMD_DOCKER_SOCKET="${systemd_mirror}/https://raw.githubusercontent.com/moby/moby/master/contrib/init/systemd/docker.socket"
+			SYSTEMD_CONTAINERD_SERVICE="${systemd_mirror}/https://raw.githubusercontent.com/containerd/containerd/main/containerd.service"
+		fi
 		;;
 esac
 
@@ -294,8 +304,10 @@ case "$openrc_mirror" in
 		OPENRC_DOCKER_INITD="https://files.m.daocloud.io/github.com/alpinelinux/aports/raw/master/community/docker/docker.initd"
 		;;
 	*)
-		OPENRC_DOCKER_CONFD="${openrc_mirror}/https://raw.githubusercontent.com/alpinelinux/aports/master/community/docker/docker.confd"
-		OPENRC_DOCKER_INITD="${openrc_mirror}/https://raw.githubusercontent.com/alpinelinux/aports/master/community/docker/docker.initd"
+		if [ -n "$openrc_mirror" ]; then
+			OPENRC_DOCKER_CONFD="${openrc_mirror}/https://raw.githubusercontent.com/alpinelinux/aports/master/community/docker/docker.confd"
+			OPENRC_DOCKER_INITD="${openrc_mirror}/https://raw.githubusercontent.com/alpinelinux/aports/master/community/docker/docker.initd"
+		fi
 		;;
 esac
 
@@ -313,7 +325,9 @@ case "$runit_mirror" in
 		RUNIT_DOCKER_RUN="https://files.m.daocloud.io/github.com/void-linux/void-packages/raw/master/srcpkgs/moby/files/docker/run"
 		;;
 	*)
-		RUNIT_DOCKER_RUN="${runit_mirror}/https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/moby/files/docker/run"
+		if [ -n "$runit_mirror" ]; then
+			RUNIT_DOCKER_RUN="${runit_mirror}/https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/moby/files/docker/run"
+		fi
 		;;
 esac
 
@@ -537,8 +551,8 @@ cat << EOF
 $DEFAULT_DAEMON_JSON_VAR
 EOF
 		echo "EOF"
- 		else
-		 		if command_exists python3; then
+		else
+				if command_exists python3; then
 					$sh_c "echo '$DEFAULT_DAEMON_JSON_VAR' | python3 -m json.tool > ${daemonJsonPath}"
 				else
 					$sh_c "echo '$DEFAULT_DAEMON_JSON_VAR' > ${daemonJsonPath}"
