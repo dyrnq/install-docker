@@ -13,7 +13,7 @@ Support systemd、openrc、runit.
 ```bash
 curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh | bash -s docker \
 --mirror Tuna \
---version 27.1.1
+--version 29.6.0
 ```
 
 or with docker-compose
@@ -21,9 +21,9 @@ or with docker-compose
 ```bash
 curl -fsSL https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh | bash -s docker \
 --mirror Tuna \
---version 27.1.1 \
+--version 29.6.0 \
 --with-compose \
---compose-version 2.29.1 \
+--compose-version v5.2.0 \
 --compose-mirror daocloud
 ```
 
@@ -33,9 +33,9 @@ or with docker-compose plugin
 mkdir -p /usr/local/lib/docker/cli-plugins
 curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/dyrnq/install-docker/main/install-docker.sh | bash -s docker \
 --mirror tencent \
---version 27.1.1 \
+--version 29.6.0 \
 --with-compose \
---compose-version 2.29.1 \
+--compose-version v5.2.0 \
 --compose-mirror daocloud \
 --compose-prefix /usr/local/lib/docker/cli-plugins \
 --systemd-mirror "ghproxy"
@@ -68,7 +68,7 @@ chmod +x ./install-docker.sh
 - --version
 
 ```bash
-./install-docker.sh --mirror Tuna --version 27.1.1 --prefix /usr/local/bin
+./install-docker.sh --mirror Tuna --version 29.6.0 --prefix /usr/local/bin
 ```
 
 - --mirror
@@ -103,7 +103,7 @@ chmod +x ./install-docker.sh
 - --with-compose
 
 ```bash
-./install-docker.sh --mirror Tuna --version 27.1.1 --prefix /usr/local/bin --with-compose --compose-version 2.29.1 --compose-mirror daocloud --compose-prefix /usr/local/bin
+./install-docker.sh --mirror Tuna --version 29.6.0 --prefix /usr/local/bin --with-compose --compose-version v5.2.0 --compose-mirror daocloud --compose-prefix /usr/local/bin
 ```
 
 - --dry-run
@@ -118,10 +118,10 @@ chmod +x ./install-docker.sh
 | -------------------- | ------------------------------------------- | -------------- |
 | --mirror             | mirror of docker binary download url        |                |
 | --prefix             | docker binary installation directory        | /usr/local/bin |
-| --version            | docker binary version                       | 20.10.2        |
+| --version            | docker binary version                       | 29.6.0         |
 | --with-compose       | install docker-compose                      |                |
 | --compose-prefix     | docker-compose installation directory       | /usr/local/bin |
-| --compose-version    | docker-compose version                      | 1.28.2         |
+| --compose-version    | docker-compose version                      | v5.2.0         |
 | --compose-mirror     | mirror of docker-compose download url       |                |
 | --systemd-mirror     | mirror of dockerd`s systemd unit files      | jsdelivr       |
 | --no-systemd         | do not install dockerd`s systemd unit files |                |

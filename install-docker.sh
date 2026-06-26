@@ -4,8 +4,8 @@ set -Eeo pipefail
 
 DEFAULT_DOWNLOAD_URL="https://download.docker.com"
 DEFAULT_PREFIX=/usr/local/bin
-DEFAULT_VERSION="20.10.2"
-DEFAULT_COMPOSE_VERSION="1.28.2"
+DEFAULT_VERSION="29.6.0"
+DEFAULT_COMPOSE_VERSION="v5.2.0"
 DEFAULT_COMPOSE_DOWNLOAD_URL="https://github.com/docker/compose"
 DEFAULT_COMPOSE_PREFIX=${DEFAULT_PREFIX}
 # The channel to install from:
