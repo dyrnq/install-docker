@@ -6,6 +6,8 @@ Supports installation on more operating systems, centos, debian, ubuntu, openSUS
 
 Support docker-compose binary installation.
 
+Support docker buildx binary installation.
+
 Support systemd、openrc、runit.
 
 ## Quickstart
@@ -39,6 +41,30 @@ curl -fsSL https://ghfast.top/https://raw.githubusercontent.com/dyrnq/install-do
 --compose-mirror daocloud \
 --compose-prefix /usr/local/lib/docker/cli-plugins \
 --systemd-mirror "ghproxy"
+```
+
+or with buildx
+
+```bash
+curl -fsSL https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh | bash -s docker \
+--mirror Tuna \
+--version 29.6.0 \
+--with-buildx \
+--buildx-version v0.20.1 \
+--buildx-mirror daocloud
+```
+
+or with buildx plugin
+
+```bash
+mkdir -p /usr/local/lib/docker/cli-plugins
+curl -fsSL https://cdn.jsdelivr.net/gh/dyrnq/install-docker@main/install-docker.sh | bash -s docker \
+--mirror Tuna \
+--version 29.6.0 \
+--with-buildx \
+--buildx-version v0.20.1 \
+--buildx-mirror daocloud \
+--buildx-prefix /usr/local/lib/docker/cli-plugins
 ```
 
 ## Get
@@ -106,6 +132,12 @@ chmod +x ./install-docker.sh
 ./install-docker.sh --mirror Tuna --version 29.6.0 --prefix /usr/local/bin --with-compose --compose-version v5.2.0 --compose-mirror daocloud --compose-prefix /usr/local/bin
 ```
 
+- --with-buildx
+
+```bash
+./install-docker.sh --mirror Tuna --version 29.6.0 --prefix /usr/local/bin --with-buildx --buildx-version v0.20.1 --buildx-mirror daocloud --buildx-prefix /usr/local/bin
+```
+
 - --dry-run
 
 ```bash
@@ -123,6 +155,10 @@ chmod +x ./install-docker.sh
 | --compose-prefix     | docker-compose installation directory       | /usr/local/bin |
 | --compose-version    | docker-compose version                      | v5.2.0         |
 | --compose-mirror     | mirror of docker-compose download url       |                |
+| --with-buildx        | install docker buildx                       |                |
+| --buildx-prefix      | buildx installation directory               | /usr/local/bin |
+| --buildx-version     | buildx version                              | v0.20.1        |
+| --buildx-mirror      | mirror of buildx download url               |                |
 | --systemd-mirror     | mirror of dockerd`s systemd unit files      | jsdelivr       |
 | --no-systemd         | do not install dockerd`s systemd unit files |                |
 | --daemon-json        | daemon.json path or url                     |                |

@@ -8,6 +8,9 @@ DEFAULT_VERSION="29.6.0"
 DEFAULT_COMPOSE_VERSION="v5.2.0"
 DEFAULT_COMPOSE_DOWNLOAD_URL="https://github.com/docker/compose"
 DEFAULT_COMPOSE_PREFIX=${DEFAULT_PREFIX}
+DEFAULT_BUILDX_VERSION="v0.20.1"
+DEFAULT_BUILDX_DOWNLOAD_URL="https://github.com/docker/buildx"
+DEFAULT_BUILDX_PREFIX=${DEFAULT_PREFIX}
 # The channel to install from:
 #   * nightly
 #   * test
@@ -56,6 +59,18 @@ if [ -z "$COMPOSE_DOWNLOAD_URL" ]; then
 	COMPOSE_DOWNLOAD_URL=$DEFAULT_COMPOSE_DOWNLOAD_URL
 fi
 
+if [ -z "$BUILDX_VERSION" ]; then
+	BUILDX_VERSION=$DEFAULT_BUILDX_VERSION
+fi
+
+if [ -z "$BUILDX_PREFIX" ]; then
+	BUILDX_PREFIX=$DEFAULT_BUILDX_PREFIX
+fi
+
+if [ -z "$BUILDX_DOWNLOAD_URL" ]; then
+	BUILDX_DOWNLOAD_URL=$DEFAULT_BUILDX_DOWNLOAD_URL
+fi
+
 if [ -z "$SYSTEMD_DOCKER_SERVICE" ]; then
 	SYSTEMD_DOCKER_SERVICE=$DEFAULT_SYSTEMD_DOCKER_SERVICE
 fi
@@ -83,6 +98,7 @@ fi
 
 mirror=''
 compose_mirror=''
+buildx_mirror=''
 systemd_mirror=''
 openrc_mirror=''
 runit_mirror=''
@@ -90,12 +106,14 @@ SYSTEMD=${DEFAULT_SYSTEMD:-}
 DRY_RUN=${DRY_RUN:-}
 OVERRIDE_EXISTING=${OVERRIDE_EXISTING:-}
 WITH_COMPOSE=${WITH_COMPOSE:-}
+WITH_BUILDX=${WITH_BUILDX:-}
 WITH_OPENRC=${WITH_OPENRC:-}
 WITH_RUNIT=${WITH_RUNIT:-}
 WRITE_DAEMON_JSON_FILE=${DEFAULT_WRITE_DAEMON_JSON_FILE:-}
 DAEMON_JSON_FILE=${DAEMON_JSON_FILE:-}
 FLAG_PREFIX=${FLAG_PREFIX:-}
 FLAG_COMPOSE_PREFIX=${FLAG_COMPOSE_PREFIX:-}
+FLAG_BUILDX_PREFIX=${FLAG_BUILDX_PREFIX:-}
 NO_MKDIR=${NO_MKDIR:-}
 while [ $# -gt 0 ]; do
 	case "$1" in
@@ -125,6 +143,20 @@ while [ $# -gt 0 ]; do
 		--compose-mirror)
 			compose_mirror_opt="$2"
 			compose_mirror="$(echo "$compose_mirror_opt" | tr '[:upper:]' '[:lower:]')"
+			shift
+			;;
+		--buildx-prefix)
+			BUILDX_PREFIX="$2"
+			FLAG_BUILDX_PREFIX=1
+			shift
+			;;
+		--buildx-version)
+			BUILDX_VERSION="$2"
+			shift
+			;;
+		--buildx-mirror)
+			buildx_mirror_opt="$2"
+			buildx_mirror="$(echo "$buildx_mirror_opt" | tr '[:upper:]' '[:lower:]')"
 			shift
 			;;
 		--dry-run)
@@ -168,6 +200,9 @@ while [ $# -gt 0 ]; do
 			;;
 		--with-compose)
 			WITH_COMPOSE=1
+			;;
+		--with-buildx)
+			WITH_BUILDX=1
 			;;
 		--with-openrc)
 			WITH_OPENRC=1
@@ -252,6 +287,17 @@ case "$compose_mirror" in
 	*)
 		if [ -n "$compose_mirror" ]; then
 			COMPOSE_DOWNLOAD_URL="${compose_mirror}"
+		fi
+		;;
+esac
+
+case "$buildx_mirror" in
+	daocloud)
+		BUILDX_DOWNLOAD_URL="https://files.m.daocloud.io/github.com/docker/buildx"
+		;;
+	*)
+		if [ -n "$buildx_mirror" ]; then
+			BUILDX_DOWNLOAD_URL="${buildx_mirror}"
 		fi
 		;;
 esac
@@ -353,6 +399,16 @@ is_flag_compose_prefix() {
 if is_flag_prefix && ! is_flag_compose_prefix; then
 	COMPOSE_PREFIX="$PREFIX"
 fi
+is_flag_buildx_prefix() {
+	if [ -z "$FLAG_BUILDX_PREFIX" ]; then
+		return 1
+	else
+		return 0
+	fi
+}
+if is_flag_prefix && ! is_flag_buildx_prefix; then
+	BUILDX_PREFIX="$PREFIX"
+fi
 is_dry_run() {
 	if [ -z "$DRY_RUN" ]; then
 		return 1
@@ -408,6 +464,14 @@ is_with_runit() {
 
 is_with_compose() {
 	if [ -z "$WITH_COMPOSE" ]; then
+		return 1
+	else
+		return 0
+	fi
+}
+
+is_with_buildx() {
+	if [ -z "$WITH_BUILDX" ]; then
 		return 1
 	else
 		return 0
@@ -531,6 +595,22 @@ do_install_static() {
 
 		$sh_c "curl -fSL --progress-bar $compose_url -o $COMPOSE_PREFIX/docker-compose"
 		$sh_c "chmod +x $COMPOSE_PREFIX/docker-compose"
+	fi
+	if is_with_buildx; then
+		# https://github.com/docker/buildx/releases/download/v0.20.1/buildx-v0.20.1.linux-amd64
+		BUILDX_VERSION_NUM="${BUILDX_VERSION#v}"
+		BUILDX_VERSION_PATH="v${BUILDX_VERSION_NUM}"
+		buildx_kernel="$(uname -s | tr '[:upper:]' '[:lower:]')"
+		case "$(uname -m)" in
+			x86_64) buildx_arch=amd64 ;;
+			aarch64) buildx_arch=arm64 ;;
+			*) echo "ERROR: unsupported arch $(uname -m) for buildx"; exit 1 ;;
+		esac
+		buildx_file="buildx-${BUILDX_VERSION_PATH}.${buildx_kernel}-${buildx_arch}"
+		buildx_url="${BUILDX_DOWNLOAD_URL}/releases/download/${BUILDX_VERSION_PATH}/${buildx_file}"
+
+		$sh_c "curl -fSL --progress-bar $buildx_url -o $BUILDX_PREFIX/docker-buildx"
+		$sh_c "chmod +x $BUILDX_PREFIX/docker-buildx"
 	fi
 
 daemonJsonPath="${DAEMON_JSON_FILE_PREFIX}/daemon.json"
@@ -725,6 +805,10 @@ do_install() {
 	fi
 	if [ ! "$PREFIX" = "$COMPOSE_PREFIX" ] && [ ! -d "$COMPOSE_PREFIX" ]; then
 		echo "ERROR: ${COMPOSE_PREFIX} directory does not exist"
+		prefix_check=1
+	fi
+	if [ ! "$PREFIX" = "$BUILDX_PREFIX" ] && [ ! -d "$BUILDX_PREFIX" ]; then
+		echo "ERROR: ${BUILDX_PREFIX} directory does not exist"
 		prefix_check=1
 	fi
 	if [ -n "$prefix_check" ]; then
