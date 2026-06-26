@@ -168,6 +168,8 @@ chmod +x ./install-docker.sh
 | --openrc-mirror      | mirror of dockerd`s init.d files            | jsdelivr       |
 | --with-runit         | will install dockerd`s runit files          |                |
 | --runit-mirror       | mirror of dockerd`s runit files             | jsdelivr       |
+| --proxy              | HTTP/HTTPS proxy passed to every curl call  |                |
+| --noproxy            | comma-separated hosts to bypass the proxy   |                |
 | --dry-run            | dry run                                     |                |
 | --override-existing  | override existing                           |                |
 

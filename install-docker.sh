@@ -194,6 +194,14 @@ while [ $# -gt 0 ]; do
 			runit_mirror="$(echo "$runit_mirror_opt" | tr '[:upper:]' '[:lower:]')"
 			shift
 			;;
+		--proxy)
+			PROXY="$2"
+			shift
+			;;
+		--noproxy)
+			NOPROXY="$2"
+			shift
+			;;
 		--systemd-prefix)
 			SYSTEMD_PREFIX="$2"
 			shift
@@ -219,6 +227,16 @@ while [ $# -gt 0 ]; do
 	esac
 	shift $(( $# > 0 ? 1 : 0 ))
 done
+
+# Build curl opts array to splice into every download call below.
+curl_opts_array=()
+if [ -n "$PROXY" ]; then
+	curl_opts_array+=("--proxy $PROXY")
+fi
+if [ -n "$NOPROXY" ]; then
+	curl_opts_array+=("--noproxy $NOPROXY")
+fi
+curl_opts="${curl_opts_array[*]}"
 
 case "$mirror" in
 	aliyun)
@@ -571,7 +589,7 @@ do_install_static() {
 	platform=$(uname -s | awk '{print tolower($0)}')
 	url=${DOWNLOAD_URL}/${platform}/static/${CHANNEL}/$(uname -m)/docker-${VERSION}.tgz
 	
-	$sh_c "curl -fsSL ${url} | tar -xvz --strip-components 1 --directory=${PREFIX}"
+	$sh_c "curl $curl_opts -fsSL ${url} | tar -xvz --strip-components 1 --directory=${PREFIX}"
 	if is_with_compose; then
 		# https://github.com/docker/compose/releases/download/v5.1.3/docker-compose-linux-x86_64
 		# https://github.com/docker/compose/releases/download/v2.40.2/docker-compose-linux-x86_64
@@ -593,7 +611,7 @@ do_install_static() {
 
 		compose_url="${COMPOSE_DOWNLOAD_URL}/releases/download/${COMPOSE_VERSION_PATH}/${compose_file}"
 
-		$sh_c "curl -fSL --progress-bar $compose_url -o $COMPOSE_PREFIX/docker-compose"
+		$sh_c "curl $curl_opts -fSL --progress-bar $compose_url -o $COMPOSE_PREFIX/docker-compose"
 		$sh_c "chmod +x $COMPOSE_PREFIX/docker-compose"
 	fi
 	if is_with_buildx; then
@@ -609,7 +627,7 @@ do_install_static() {
 		buildx_file="buildx-${BUILDX_VERSION_PATH}.${buildx_kernel}-${buildx_arch}"
 		buildx_url="${BUILDX_DOWNLOAD_URL}/releases/download/${BUILDX_VERSION_PATH}/${buildx_file}"
 
-		$sh_c "curl -fSL --progress-bar $buildx_url -o $BUILDX_PREFIX/docker-buildx"
+		$sh_c "curl $curl_opts -fSL --progress-bar $buildx_url -o $BUILDX_PREFIX/docker-buildx"
 		$sh_c "chmod +x $BUILDX_PREFIX/docker-buildx"
 	fi
 
@@ -619,7 +637,7 @@ if is_write_daemon_json; then
 
 	if [ -n "$DAEMON_JSON_FILE" ]; then
 		if [[ "$DAEMON_JSON_FILE" =~ ^http.* ]]; then
-			$sh_c "curl --retry 3 -fsSL ${DAEMON_JSON_FILE} --output ${daemonJsonPath}";
+			$sh_c "curl $curl_opts --retry 3 -fsSL ${DAEMON_JSON_FILE} --output ${daemonJsonPath}";
 		else
 			$sh_c "cat ${DAEMON_JSON_FILE} > ${daemonJsonPath}";
 		fi
@@ -642,9 +660,9 @@ EOF
 fi
 	if [[ "$(cat /proc/1/comm)" =~ systemd ]] && is_systemd; then
 		$sh_c "mkdir -p /etc/systemd/system/docker.service.d"
-		$sh_c "curl --retry 3 -fsSL -o ${SYSTEMD_PREFIX}/docker.service ${SYSTEMD_DOCKER_SERVICE}"
-		$sh_c "curl --retry 3 -fsSL -o ${SYSTEMD_PREFIX}/docker.socket ${SYSTEMD_DOCKER_SOCKET}"
-		$sh_c "curl --retry 3 -fsSL -o ${SYSTEMD_PREFIX}/containerd.service ${SYSTEMD_CONTAINERD_SERVICE}"
+		$sh_c "curl $curl_opts --retry 3 -fsSL -o ${SYSTEMD_PREFIX}/docker.service ${SYSTEMD_DOCKER_SERVICE}"
+		$sh_c "curl $curl_opts --retry 3 -fsSL -o ${SYSTEMD_PREFIX}/docker.socket ${SYSTEMD_DOCKER_SOCKET}"
+		$sh_c "curl $curl_opts --retry 3 -fsSL -o ${SYSTEMD_PREFIX}/containerd.service ${SYSTEMD_CONTAINERD_SERVICE}"
 		if [ "$PREFIX" != "/usr/bin" ]; then
 			$sh_c "sed -i \"s@/usr/bin/dockerd@""$PREFIX""/dockerd@g\" ${SYSTEMD_PREFIX}/docker.service"
 		fi
@@ -662,8 +680,8 @@ fi
 
 	# openrc compatible
 	if openrc --version > /dev/null 2>&1 && is_with_openrc; then
-		$sh_c "curl --retry 3 -fsSL -o /etc/conf.d/docker ${OPENRC_DOCKER_CONFD}"
-		$sh_c "curl --retry 3 -fsSL -o /etc/init.d/docker ${OPENRC_DOCKER_INITD}"
+		$sh_c "curl $curl_opts --retry 3 -fsSL -o /etc/conf.d/docker ${OPENRC_DOCKER_CONFD}"
+		$sh_c "curl $curl_opts --retry 3 -fsSL -o /etc/init.d/docker ${OPENRC_DOCKER_INITD}"
 		$sh_c "chmod +x /etc/init.d/docker"
 		if [ "$PREFIX" != "/usr/bin" ]; then
 			$sh_c "sed -i \"s@^#DOCKERD_BINARY.*@DOCKERD_BINARY=""$PREFIX""/dockerd@g\" /etc/conf.d/docker"
@@ -682,7 +700,7 @@ fi
 			fi
 		done
 		$sh_c "mkdir -p ${sv}/docker"
-		$sh_c "curl --retry 3 -fsSL -o ${sv}/docker/run ${RUNIT_DOCKER_RUN}"
+		$sh_c "curl $curl_opts --retry 3 -fsSL -o ${sv}/docker/run ${RUNIT_DOCKER_RUN}"
 		$sh_c "chmod +x ${sv}/docker/run"
 		$sh_c "ln -s -f ${sv}/docker /etc/runit/runsvdir/current/"
 	fi
