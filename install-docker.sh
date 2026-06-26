@@ -268,9 +268,9 @@ case "$systemd_mirror" in
 		SYSTEMD_CONTAINERD_SERVICE="https://cdn.jsdelivr.net/gh/containerd/containerd@main/containerd.service"
 		;;
 	ghproxy)
-		SYSTEMD_DOCKER_SERVICE="https://mirror.ghproxy.com/https://raw.githubusercontent.com/moby/moby/master/contrib/init/systemd/docker.service"
-		SYSTEMD_DOCKER_SOCKET="https://mirror.ghproxy.com/https://raw.githubusercontent.com/moby/moby/master/contrib/init/systemd/docker.socket"
-		SYSTEMD_CONTAINERD_SERVICE="https://mirror.ghproxy.com/https://raw.githubusercontent.com/containerd/containerd/main/containerd.service"
+		SYSTEMD_DOCKER_SERVICE="https://ghfast.top/https://raw.githubusercontent.com/moby/moby/master/contrib/init/systemd/docker.service"
+		SYSTEMD_DOCKER_SOCKET="https://ghfast.top/https://raw.githubusercontent.com/moby/moby/master/contrib/init/systemd/docker.socket"
+		SYSTEMD_CONTAINERD_SERVICE="https://ghfast.top/https://raw.githubusercontent.com/containerd/containerd/main/containerd.service"
 		;;
 	daocloud)
 		SYSTEMD_DOCKER_SERVICE="https://files.m.daocloud.io/github.com/moby/moby/raw/master/contrib/init/systemd/docker.service"
@@ -296,8 +296,8 @@ case "$openrc_mirror" in
 		OPENRC_DOCKER_INITD="https://cdn.jsdelivr.net/gh/alpinelinux/aports@master/community/docker/docker.initd"
 		;;
 	ghproxy)
-		OPENRC_DOCKER_CONFD="https://mirror.ghproxy.com/https://raw.githubusercontent.com/alpinelinux/aports/master/community/docker/docker.confd"
-		OPENRC_DOCKER_INITD="https://mirror.ghproxy.com/https://raw.githubusercontent.com/alpinelinux/aports/master/community/docker/docker.initd"
+		OPENRC_DOCKER_CONFD="https://ghfast.top/https://raw.githubusercontent.com/alpinelinux/aports/master/community/docker/docker.confd"
+		OPENRC_DOCKER_INITD="https://ghfast.top/https://raw.githubusercontent.com/alpinelinux/aports/master/community/docker/docker.initd"
 		;;
 	daocloud)
 		OPENRC_DOCKER_CONFD="https://files.m.daocloud.io/github.com/alpinelinux/aports/raw/master/community/docker/docker.confd"
@@ -319,7 +319,7 @@ case "$runit_mirror" in
 		RUNIT_DOCKER_RUN="https://cdn.jsdelivr.net/gh/void-linux/void-packages@master/srcpkgs/moby/files/docker/run"
 		;;
 	ghproxy)
-		RUNIT_DOCKER_RUN="https://mirror.ghproxy.com/https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/moby/files/docker/run"
+		RUNIT_DOCKER_RUN="https://ghfast.top/https://raw.githubusercontent.com/void-linux/void-packages/master/srcpkgs/moby/files/docker/run"
 		;;
 	daocloud)
 		RUNIT_DOCKER_RUN="https://files.m.daocloud.io/github.com/void-linux/void-packages/raw/master/srcpkgs/moby/files/docker/run"
